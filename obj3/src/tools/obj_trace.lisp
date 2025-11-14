@@ -41,7 +41,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; see also: lib/functions.lsp
-(in-package #:user)
+(in-package #:obj3)
 (defvar obj_trace_time 0)
 (defvar obj_traced_functions nil)
 (defvar obj_trace_struct t)

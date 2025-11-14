@@ -33,7 +33,7 @@
 ;; OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ;; $Id: sigs.lsp,v 206.1 2003/09/26 13:02:36 kiniry Exp $
-(in-package #:user)
+(in-package #:obj3)
 ; Signal handling.
 ; DANGER -- this is implementation dependent.
 

@@ -44,7 +44,7 @@
 ;;;;;;;;;;;;;;;; Claude Kirchner ;;;; Created: April 86.
 
 ;;;;;;;;;;;;;;;; Summary
-(in-package #:user)
+(in-package #:obj3)
 (defun theory_name$is_empty_for_matching (th_name)
   (theory_info$empty_for_matching th_name))
 

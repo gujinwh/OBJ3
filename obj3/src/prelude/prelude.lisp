@@ -41,7 +41,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;; Tim Winkler ;;;; Created: 7/22/86
-(in-package #:user)
+(in-package #:obj3)
 ;;;;;;;;;;;;;;;; Summary ;;;;;;;;;;;;;;;;
 ;somewhat out-of-date
 ; op obj_BOOL$is_true : Term -> Bool

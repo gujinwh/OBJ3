@@ -96,7 +96,7 @@
 ;;;;;;;;;;;;;;;;
 
                                         ; op sort_order$new: -> SortOrder
-(in-package #:user)
+(in-package #:obj3)
 
 (defun sort_order$new ()
   ()

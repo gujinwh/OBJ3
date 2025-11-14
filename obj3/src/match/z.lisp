@@ -43,7 +43,7 @@
 ;;;; Patrick Lincoln     May 1990, August 1990
 ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package #:user)
+(in-package #:obj3)
 (defstruct z-state
   n
   sys)

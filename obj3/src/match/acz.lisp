@@ -206,7 +206,7 @@
 ;;   (make-array (list m n) :element-type 'fixnum :initial-element 0))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package #:user)
+(in-package #:obj3)
 
 (defstruct ACZ-state
   operators ;; array[op]; the top level operators of each eqn in the system

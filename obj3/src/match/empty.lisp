@@ -50,7 +50,7 @@
 ; the mutation process of a (non empty) theory.
 
 ;;;;;;;;;;;;;;;; Representation
-(in-package #:user)
+(in-package #:obj3)
 ; An empty state consists into a system and a flag 0 or 1. 
 ; 0 means that the state is a new one and that one as to decompose the system.
 ; 1 means that the decomposition has been already done and that there is 

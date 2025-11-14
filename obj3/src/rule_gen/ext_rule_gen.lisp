@@ -53,7 +53,7 @@
 
 ;; op rule_gen$$strip_operator_drule : List[3tuple(Module Operator Rule)] -> 
 ;;                                     List[2tuple(Module Rule)]
-(in-package #:user)
+(in-package #:obj3)
 (defun rule_gen$$strip_operator_drule (DRS)
   (let ((result nil))
     (dolist (el DRS)

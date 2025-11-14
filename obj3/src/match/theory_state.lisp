@@ -71,7 +71,7 @@
 ; returns a new theory_state
 ; initialize= proc(th_name: theory_name, sys) returns(cvt)
 
-(in-package #:user)
+(in-package #:obj3)
 (defun theory_state$initialize (th_name sys env)
   (funcall (theory_info$init th_name) sys env))
 

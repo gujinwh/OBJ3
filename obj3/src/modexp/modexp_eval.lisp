@@ -54,7 +54,7 @@
 ; the original notion was canonicalization followed by evaluation,
 ; but canonicalization necessarily requires evaluation; the
 ; two processes go hand-in-hand
-(in-package #:user)
+(in-package #:obj3)
 (defvar obj$current_module)
 (defvar *obj$allow_uninstantiated* nil)
 

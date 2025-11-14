@@ -41,7 +41,7 @@
 ; This is implementation specific
 ; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package #:user)
+(in-package #:obj3)
 
 (defmacro save-var (var)
   `(progn (defvar ,var) (setq ,var ',(symbol-value var))))
@@ -97,7 +97,7 @@
 	  'failed)
       (progn
 	(with-open-file (*standard-output* filename :direction :output)
-	  (format t "(in-package :user)~T")
+	  (format t "(in-package :obj3)~T")
 	  (format t "(obj3-save-vars)~%")
 	  )
 	(compile-file filename)

@@ -86,7 +86,7 @@
 ;  last a flag indicating if all the states of the system have been
 ;  explored
 ;                            no_more: bool}
-(in-package #:user)
+(in-package #:obj3)
 ; equation_comp = record{sz_left: integer,
 ;                        left: array[term], 
 ;                        right: array[term], 

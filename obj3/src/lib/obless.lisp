@@ -53,7 +53,7 @@
 ;cons
 ;array simple_array
 ;compiled-function random-state pathname hash-table package read-table stream
-(in-package #:user)
+(in-package #:obj3)
 ; ordering
 ;  symbol<cons<number<character<complex<string<sequence<structure
 

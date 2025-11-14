@@ -59,7 +59,7 @@
 ;; @todo Perhaps need to rename this structure to avoid clashing with
 ;; sort in CLOS. -- kiniry 25 Sept 2003
 
-(in-package #:user)
+(in-package #:obj3)
 (defstruct (sort
 	    (:conc-name sort$)
 	    (:constructor sort$make)

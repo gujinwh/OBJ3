@@ -51,7 +51,7 @@
 
 ;; Use the Hash table facility of Common Lisp.
 ;; See possible improvment in the text of get_normal_form.
-(in-package #:user)
+(in-package #:obj3)
 (defvar *memo_rew$table* nil)
 
 ;; returns a memo table. 
@@ -68,8 +68,7 @@
 
 (defun memo_rew$clean_memo_table (memo)
   (hashtab$clear memo)
-  memo
-  )
+  memo)
 
 ;; Returns the normal form of the term for the current environment.
 ;; Let "term_nu" be the term obtained from "term" by cleaning
@@ -110,6 +109,4 @@
 	;; store the normal form
 	(hashtab$set term_nu memo_table normal_form)
 	)
-    normal_form
-    )
-  )
+    normal_form))

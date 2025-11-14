@@ -66,7 +66,7 @@
 ;;; dictionary is a structure -- two main parts
 ;;;   hash table for ordinary parsing information
 ;;;   list for builtin information ("intensional")
-(in-package #:user)
+(in-package #:obj3)
 (defstruct (parse_dictionary
 	    (:conc-name dictionary$)
 	    (:constructor dictionary$make))

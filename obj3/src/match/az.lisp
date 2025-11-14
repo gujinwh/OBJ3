@@ -111,7 +111,7 @@
 ;                        left: array[term], 
 ;                        right: array[term], 
 ;                        comp: array[integer]}
-(in-package #:user)
+(in-package #:obj3)
  (defstruct AZ_state
         (size 0 :type integer :read-only t)
 	(operator nil :read-only t)

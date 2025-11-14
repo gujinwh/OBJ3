@@ -53,7 +53,7 @@
 
 ; var *module_parse$module_schemas* : schemas describing [constant]
 ;   OBJ3 module structure; for use with general_read$reader
-(in-package #:user)
+(in-package #:obj3)
 (defvar *module_parse$module_schemas*)
 (defvar *general_read$$schema_env*)
 
@@ -213,93 +213,99 @@
 ; op general_read$$read : {*standard_input*} schema context ->
 ;                         {*standard_input*} parse_tree
 (defun general_read$$read (schema context)
-  (let ((*general_read$$current_schema* schema)
-	(*general_read$$current_context* context)
-	(*general_read$$starting-position*
-          (file-position #-CLISP *standard-input* #+CLISP (make-stream :input))))
+  (when (null schema)
+    (return-from general_read$$read))
+  (let* ((*general_read$$current_schema* schema)
+	 (*general_read$$current_context* context)
+	 (*general_read$$starting-position*
+           #+sbcl(unwind-protect (ignore-errors
+                                  (file-position *standard-input*)) ; sbcl has a bug on the Windows console so we use unwind-protect and ignore-errors
+                   nil)
+           #-sbcl(file-position *standard-input*))
+         (elt (first schema))
+         (rest (rest schema))
+         (restcontext (if rest rest context))
+         elt-1 elt-2)
     #+c(break "~A" (file-position *standard-input*))
     #+c(when (>= *general_read$$starting-position* 16037)
-      (print *general_read$$starting-position*)
-      (break)
-      )
-  (cond ((null schema) nil)
-  (t (let ((elt (car schema)) (rest (cdr schema)))
-    (let ((restcontext (if rest rest context)))
+         (print *general_read$$starting-position*)
+         (break)
+         )
+    (when (consp elt)
+      (setf elt-1 (first elt)
+            elt-2 (second elt)))
     (cond
-     ((symbolp elt)
-     (case elt
-      (&optional (general_read$$optional rest context))
-      (&if_present (general_read$$if_present rest context))
-      (&one_of (general_read$$one_of rest context))
-      (&one_of_default (general_read$$one_of_default rest context))
-      (&many_of ;like one_of but with repetitions
-        (general_read$$many_of rest context))
-      (&seq_of (general_read$$seq_of rest context))
-      (&symbol (general_read$$continue (general_read$$!sym) rest context))
-      (&symbols (general_read$$continue (general_read$$seq_of '(&symbol)
-							    restcontext)
-				       rest context))
-      (&int (let ((val (general_read$$!sym)))
-	(cond
-	 ((general_read$$numberp val)
-	  (general_read$$continue val rest context))
-	 (t (format t "was expecting an integer not ~s" val)
-	    (general_read$$show_context)
-	    (obj3-return-to-top)))))
-      (&term (general_read$$continue (general_read$$term restcontext)
-				    rest context))
-      (&sort (general_read$$continue (general_read$$sort restcontext)
-				    rest context))
-      (&sorts (general_read$$continue (general_read$$sorts restcontext)
-				    rest context))
-      (&comment (general_read$$continue (read-line) rest context))
-      (&commentlong
-       (general_read$$continue (general_read$$commentlong) rest context))
-      (&+ (general_read$$any_one rest))
-      (&& ; use named description
-       (general_read$$named (car rest) context))
-      (&call (eval (car rest)))
-      (&append
-       (let* ((rr (cdr rest))
-	      (rc (if rr rr context)))
-       (general_read$$continue_append
-	(general_read$$read (car rest) rc) rr context)))
-      (&rdr
-       (let ((cur (general_read$$!set_single_reader (car rest))))
-         (prog1 (general_read$$read (cdr rest) context)
-           (general_read$$!set_reader cur))))
-      (&modexp
-       (general_read$$continue
-	(general_read$$module_exp (car restcontext)) rest context))
-      (&obj_item 
-       (general_read$$!discard)
-       (let ((val (reader$read)))
-	 (let ((a (if (null (cdr val)) (car val) val)))
-	   (general_read$$continue a rest context))))
-      (otherwise
-         (general_read$$!in)
-	 (cond
-	  ((string-match *general_read$$input* elt)
-	   (let ((inp *general_read$$input*))
-	     (general_read$$!discard)
-	     (general_read$$continue inp rest context)))
-	  (t (format t "Was expecting the symbol '~a' not '~a'"
-		     elt *general_read$$input*)
-	     (general_read$$show_context)
-	     (obj3-return-to-top)))
-        )
-     ))
-    ((member (car elt) '(&& &rdr))
-     (let ((val (general_read$$read elt restcontext)))
-       (cond ((eq *general_read$$void* val) (general_read$$read rest context))
-	     (t (append val
-			(general_read$$read rest context))))))
-    ((eq '&upto (car elt))
-     (append (general_read$$read (cddr elt) (list (cadr elt)))
-	     (general_read$$read rest context)))
-    (t
-     (general_read$$continue (general_read$$read elt restcontext) rest context)
-    ))))))))
+      ((symbolp elt)
+       (case elt
+         (&optional (general_read$$optional rest context))
+         (&if_present (general_read$$if_present rest context))
+         (&one_of (general_read$$one_of rest context))
+         (&one_of_default (general_read$$one_of_default rest context))
+         (&many_of                   ;like one_of but with repetitions
+          (general_read$$many_of rest context))
+         (&seq_of (general_read$$seq_of rest context))
+         (&symbol (general_read$$continue (general_read$$!sym) rest context))
+         (&symbols (general_read$$continue (general_read$$seq_of '(&symbol)
+							         restcontext)
+				           rest context))
+         (&int (let ((val (general_read$$!sym)))
+	         (cond
+	           ((general_read$$numberp val)
+	            (general_read$$continue val rest context))
+	           (t (format t "was expecting an integer not ~s" val)
+	              (general_read$$show_context)
+	              (obj3-return-to-top)))))
+         (&term (general_read$$continue (general_read$$term restcontext)
+				        rest context))
+         (&sort (general_read$$continue (general_read$$sort restcontext)
+				        rest context))
+         (&sorts (general_read$$continue (general_read$$sorts restcontext)
+				         rest context))
+         (&comment (general_read$$continue (read-line) rest context))
+         (&commentlong
+          (general_read$$continue (general_read$$commentlong) rest context))
+         (&+ (general_read$$any_one rest))
+         (&&                            ; use named description
+          (general_read$$named (car rest) context))
+         (&call (eval (car rest)))
+         (&append
+          (let* ((rr (cdr rest))
+	         (rc (if rr rr context)))
+            (general_read$$continue_append
+	     (general_read$$read (car rest) rc) rr context)))
+         (&rdr
+          (let ((cur (general_read$$!set_single_reader (car rest))))
+            (prog1 (general_read$$read (cdr rest) context)
+              (general_read$$!set_reader cur))))
+         (&modexp
+          (general_read$$continue
+	   (general_read$$module_exp (car restcontext)) rest context))
+         (&obj_item 
+          (general_read$$!discard)
+          (let ((val (reader$read)))
+	    (let ((a (if (null (cdr val)) (car val) val)))
+	      (general_read$$continue a rest context))))
+         (otherwise
+          (general_read$$!in)
+	  (cond
+	    ((string-match *general_read$$input* elt)
+	     (let ((inp *general_read$$input*))
+	       (general_read$$!discard)
+	       (general_read$$continue inp rest context)))
+	    (t (format t "Was expecting the symbol '~a' not '~a'"
+		       elt *general_read$$input*)
+	       (general_read$$show_context)
+	       (obj3-return-to-top))))))
+      ((member elt-1 '(&& &rdr))
+       (let ((val (general_read$$read elt restcontext)))
+         (cond ((eq *general_read$$void* val) (general_read$$read rest context))
+	       (t (append val
+			  (general_read$$read rest context))))))
+      ((eq '&upto elt-1)
+       (append (general_read$$read (cddr elt) (list elt-2))
+	       (general_read$$read rest context)))
+      (t
+       (general_read$$continue (general_read$$read elt restcontext) rest context)))))
 
 ;;; PATTERN HANDLERS
 ;;; ops : {*standard_input*} args context -> {*standard_input*} parse_tree

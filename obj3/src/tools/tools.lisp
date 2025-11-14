@@ -39,7 +39,7 @@
 ; some tools for working with Common Lisp
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package #:user)
+(in-package #:obj3)
 ;;; completely expand a function definition
 (defun m-e-fn (fn)
   (cond

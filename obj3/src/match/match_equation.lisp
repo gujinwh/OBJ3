@@ -61,7 +61,7 @@
 ; create a new equation containing the terms "t1" "t2"
 
 ; op match_equation$create: Term Term -> Equation .
-(in-package #:user)
+(in-package #:obj3)
 (defun match_equation$create (t1 t2)
   (cons t1 t2)
   )

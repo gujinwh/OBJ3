@@ -1,4 +1,4 @@
-(in-package #:user)
+(in-package #:obj3)
 
 ;;; variable.lisp
 ; Returns the initial sort of the variable (gived by the user)

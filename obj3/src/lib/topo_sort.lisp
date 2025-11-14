@@ -33,7 +33,7 @@
 ;; OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ;; $Id: topo_sort.lsp,v 205.2.1.1 2003/09/23 14:12:02 kiniry Exp $
-(in-package #:user)
+(in-package #:obj3)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; Topological Sort

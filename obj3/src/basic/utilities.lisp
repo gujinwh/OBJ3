@@ -44,7 +44,7 @@
 
 ;;;;;;;;;;;;;;;; Summary
 
-(in-package #:user)
+(in-package #:obj3)
 
 (defun list2array (list)
   #+(or GENERIC CMU CLISP)

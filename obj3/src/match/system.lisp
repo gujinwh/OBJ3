@@ -66,7 +66,7 @@
 ; modify it
 
 ;;;;;;;;;;;;;;;;
-(in-package #:user)
+(in-package #:obj3)
 ; op system$create: Term Term -> System
 (defun system$create (t1 t2)
   (list (match_equation$create t1 t2))

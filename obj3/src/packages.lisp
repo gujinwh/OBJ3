@@ -1,8 +1,20 @@
-(defpackage :user
+(defpackage #:obj3.util
   (:use :cl)
-  (:shadow #:sort))
+  (:export
+   #:fmt
+   #:princn
+   #:prin1n
+   #:rel-to-cwd
+   #:rel-to-src
+   #:scase))
 
-(in-package :user)
+(defpackage :obj3
+  (:use :clsafe)
+  (:shadow #:sort)
+  (:local-nicknames (#:u #:obj3.util))
+  (:export ))
+
+(in-package :obj3)
 (defvar +version+ "OBJ3 (2.09) + TRIM")
 (defparameter *version* '(:obj3)) 
 
@@ -13,7 +25,7 @@
 
 (setq *load-verbose* t)
           (defvar *load-print-stuff* t)
-          (setq *block-compile-default* nil)
-          (setq *compile-verbose* t)
+          (defparameter *block-compile-default* nil)
+          (setf *compile-verbose* t)
  (setq *compile-print* t)
 

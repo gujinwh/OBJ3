@@ -64,7 +64,7 @@
 
 ; op match$first_match: Term Term -> GlobalState Substitution 
                                         ;                                    signals(no_match, E_equal)
-(in-package #:user)
+(in-package #:obj3)
 (defun match$first_match (t1 t2)
   (multiple-value-bind (m_sys no_match) 
       (match_system$dec_merg (match_system$new t1 t2))

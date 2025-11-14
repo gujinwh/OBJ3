@@ -39,7 +39,7 @@
 ;      miscellaneous low-level or debugging functions
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package #:user)
+(in-package #:obj3)
 (defun ev (e) (modexp_eval$eval e))
 
 (defun l (n) (setq *print-level* n))

@@ -47,7 +47,7 @@
 ; this routined eliminates identity mappings
 ; map is a list with entries of the form (sort s1 s2) or (op op1 op2)
 ; A.Socorro 21/4/93
-(in-package #:user)
+(in-package #:obj3)
 (defun rem-id (map)
   (if (null map)
       nil

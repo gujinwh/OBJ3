@@ -41,7 +41,7 @@
 ; WARNING -- this is implementation dependent
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package #:user)
+(in-package #:obj3)
 (defvar obj3-load-time)
 
 (defvar *top-level-tag* '(*quit-tag*))
@@ -168,26 +168,24 @@
     (process_input)
   )))
 
-(defun load_file (fname)
-  ; DANGER this is UNIX inspired
+(defun load_file (fname)                ; DANGER this is UNIX inspired
   (when (and (eql #\~ (char fname 0)) (eql #\/ (char fname 1)))
     (setq fname
-	(concatenate 'string
-	  (namestring (user-homedir-pathname))
-	  (subseq fname 2))))
+	  (concatenate 'string
+	               (namestring (user-homedir-pathname))
+	               (subseq fname 2))))
   (load fname))
 
 (defun obj3-default-prompt (&optional top-level)
-     (print$check)
-     (when top-level
-       (princ *obj$prompt*))
-     #+LUCID (force-output) ; This helps make the buffered mode not unusable
-     )
+  (print$check)
+  (when top-level
+    (princ *obj$prompt*))
+  (force-output))
+
 (setq *obj$prompt_hook* #'obj3-default-prompt)
 
 (defvar *in-in*)
 (defvar *top-level*)
-
 
 (defun process_input ()
   (let ((reader$$ch 'space)
@@ -195,180 +193,177 @@
 	(*top-level* (at-top-level)))
     ;;(reader$!read_init) ;@@ (take out for obj LISP)
     (memo_rew$create_memo_table)
-    (let (inp (*in-in* nil))
+    (let ((*in-in* nil))
       (catch 'end-process-input
-      (loop (the-loop inp)
-        (when *obj$postcmd_hook*
-          (funcall *obj$postcmd_hook* *top-level* inp)
-          )
-        (when *in-in*
-          (setq *obj$print_errors* t)
-          (setq *in-in* nil)))))))
+        (loop
+          (let ((inp (the-loop)))
+            (when *obj$postcmd_hook*
+              (funcall *obj$postcmd_hook* *top-level* inp)))
+          (when *in-in*
+            (setq *obj$print_errors* t)
+            (setq *in-in* nil)))))))
 
-(defun the-loop (inp)
-  (catch (if *top-level* 'obj3-top-level-error 'obj3-main-error)
-  (catch 'obj3-error
-    (when (and *top-level*
-	       *obj$prompt_hook*)
-      (funcall *obj$prompt_hook* *top-level*))
-
-    (setq inp (module_parse$parse)) ;; lhh -- does the command parsing
-
-    (when *obj$precmd_hook*
-      (funcall *obj$precmd_hook* *top-level* inp))
-   
-    (when (or (equal '("eof") inp) (equal '("q") inp) (equal '("quit") inp)
-	      (equal '(eof) inp) (equal *reader$eof_value* inp))
-      (throw 'end-process-input t))
-    (unless (or *top-level* *obj$input_quiet*)
-      (unless (or (equal "---" (car inp)) (equal "***" (car inp))
-		  (equal "?" (car inp)) (equal "[" (car inp)))
-        (fresh-line)
-        (princ "==========================================") (terpri))
-      (print_ident inp))
-    (cond
-      ((member (car inp) '("obj" "object" "th" "theory") :test #'equal)
-       (ci$!process_definition inp))
-      ((member (car inp) '("red" "reduce") :test #'equal)
-       (ci$perform_reduction inp))
-      ((member (car inp) '("ev" "eval" "evq" "eval-quiet") :test #'equal)
-       (let ((val (eval (cadr inp))))
-         (setq $ val)
-         (unless  (or *obj$input_quiet*
-		      (equal "evq" (car inp)) (equal "eval-quiet" (car inp)))
-           (princ "-> ") (terpri)
-	   (prin1 val) (terpri))))
-      ((equal "make" (car inp))         ;just an abbreviation
-       (let ((flag (equal "is" (nth 2 inp))))
-         (let ((name (nth 1 inp))
-	       (params (if flag nil (list (nth 2 inp))))
-	       (modexp (nth (if flag 3 4) inp)))
-	   (ci$!process_definition
-	    `("obj" ,name ,@params "is" (("pr" ,modexp ".")) "endo")))))
-      ((equal "view" (car inp))
-       (mod_eval$view_eval inp))
-      ((member (car inp) '("rl" "red-loop") :test #'equal)
-       (let ((arg (cadr inp)))
-         (ci$red_loop (if (equal "." arg) *mod_eval$$last_module* arg))))
-      ((member (car inp) '("in" "input") :test #'equal)
-       (let ((filename (cadr inp)))
-         (unless (or *top-level* *obj$input_quiet*)
-           (format t "Reading in file : ~s~%" filename))
-         (setq *in-in* t)
-         (obj_input (namestring (rel-to-cwd filename)))
-         (unless (or *top-level* *obj$input_quiet*)
-           (format t "Done reading in file: ~s~%" filename))))
-      ((equal (car inp) "test")
-       (ci$perform_test_reduction inp))
-      ((equal "call-that" (car inp))
-       (if *mod_eval$open_module*
-	   (let ((obj$current_module *mod_eval$open_module*)
-		 (*mod_eval$$current_module* *mod_eval$open_module*))
-	     (module$!mark_as_needs_parse_setup *mod_eval$$current_module*)
-	     (mod_eval$$include_BOOL)
-	     (mod_eval$$!do_let (list "let" (cadr inp) "=" nil "."))
-	     (module$!mark_as_needs_parse_setup *mod_eval$$current_module*)
-	     (when (module$is_compiled *mod_eval$$current_module*)
-	       (module$!mark_as_needs_compiling *mod_eval$$current_module*)))
-	   (progn (princ "Warning: no module open") (terpri))))
-      ((equal "parse" (car inp))
-       (unless *obj$input_quiet*
-         (if *mod_eval$$last_module*
-	     (progn
-	       (mod_eval$$!do_parse_setup *mod_eval$$last_module*)
-	       (let ((res (parse$parse *mod_eval$$last_module*
-		                       (obj$obj2_term (cadr inp)) *obj$sort_Universal*)))
-	         (setq $$term res)
-	         (unless *top-level* (princ "parse "))
-	         (print$short_sort_name (term$sort res))
-	         (princ ": ")
-	         (let ((*fancy-print* nil))
-	           (term$print res)
-	           (terpri)
-	           )))
-	     (progn (princ "No current module") (terpri))
-             )))
-      ((member (car inp) mod_elts :test #'equal)
-       (if *mod_eval$open_module*
-	   (let ((obj$current_module *mod_eval$open_module*)
-		 (*mod_eval$$current_module* *mod_eval$open_module*))
-	     (mod_eval$!module_element inp)
-	     )
-	   (progn
-	     (princ "Warning: no module open") (terpri)
-	     ))
-       )
-      ((equal "openr" (car inp))
-       (setq *mod_eval$last_before_open* nil)
-       (mod_eval$!open inp))
-      ((equal "open" (car inp))         ;just an abbreviation
-       (when *mod_eval$open_module*
-	 (princ "Warning: module already open: ")
-	 (print$name *mod_eval$open_module*) (terpri)
-	 (princ "Closing this module") (terpri)
-	 (close_module inp)
-	 (setq *mod_eval$$current_module* *mod_eval$$last_module*)
-	 )
-       (when (cadr inp)
-	 (setq *mod_eval$$last_module*
-	       (modexp_eval$top_level_eval
-	        (cadr inp) *mod_eval$$current_module*)))
-       (setq *mod_eval$last_before_open* *mod_eval$$last_module*)
-       (let ((*obj$allow_uninstantiated* t))
-         (if (eq 'object (module$kind *mod_eval$$last_module*))
-	     (ci$!process_definition
-	      `("obj" "%" "is" (("inc" ("THE-LAST-MODULE") ".")) "endo"))
-	     (ci$!process_definition
-	      `("th" "%" "is" (("inc" ("THE-LAST-MODULE") ".")) "endth"))))
-       (let ((obj$current_module *mod_eval$$last_module*))
-         (let ((*mod_eval$$last_module*
-	         (caar (module$sub_modules
-		        *mod_eval$$last_module*))))
-           (mod_eval$$!add_vars_of '("vars-of" "."))))
-       (mod_eval$!open nil)
-       )
-      ((equal "close" (car inp))
-       (close_module inp))
-                                        ;     ((equal "apply" (car inp)) ;@@
+(defun the-loop ()
+  (let (inp inp1 inp2 inp3 inp4 inp5)
+    (flet ((inp1-in (list)
+             (member inp1 list :test #'equal))
+           (inp1= (string-or-symbol)
+             (equal inp1 string-or-symbol)))
+      (catch (if *top-level* 'obj3-top-level-error 'obj3-main-error)
+        (catch 'obj3-error
+          (when (and *top-level*
+	             *obj$prompt_hook*)
+            (funcall *obj$prompt_hook* *top-level*))
+          (setq inp (module_parse$parse) ;; lhh -- does the command parsing
+                inp1 (first inp)
+                inp2 (second inp)
+                inp3 (third inp)
+                inp4 (fourth inp)
+                inp5 (fifth inp))
+          (when *obj$precmd_hook*
+            (funcall *obj$precmd_hook* *top-level* inp))
+          (when (inp1-in `("eof" "q" "quit" eof inp ,(car *reader$eof_value*)))
+            (throw 'end-process-input t))
+          (unless (or *top-level* *obj$input_quiet*)
+            (unless (inp1-in '("---" "***" "?" "["))
+              (fresh-line)
+              (u:princn "=========================================="))
+            (print_ident inp))
+          (cond
+            ((inp1-in '("obj" "object" "th" "theory"))
+             (ci$!process_definition inp))
+            ((inp1-in '("red" "reduce"))
+             (ci$perform_reduction inp))
+            ((inp1-in '("ev" "eval" "evq" "eval-quiet"))
+             (let ((val (eval inp2)))
+               (setq $ val)
+               (unless (or *obj$input_quiet* (inp1-in '("evq" "eval-quiet")))
+                 (u:princn "-> ")
+	         (u:prin1n val))))
+            ((inp1= "make")             ;just an abbreviation
+             (let ((flag (equal "is" inp3)))
+               (let ((name (nth 1 inp))
+	             (params (if flag nil (list inp3)))
+	             (modexp (if flag inp4 inp5)))
+	         (ci$!process_definition
+	          `("obj" ,name ,@params "is" (("pr" ,modexp ".")) "endo")))))
+            ((inp1= "view")
+             (mod_eval$view_eval inp))
+            ((inp1-in '("rl" "red-loop"))
+             (let ((arg inp2))
+               (ci$red_loop (if (equal "." arg)
+                                *mod_eval$$last_module*
+                                arg))))
+            ((inp1-in '("in" "input"))
+             (let ((filename inp2))
+               (unless (or *top-level* *obj$input_quiet*)
+                 (format t "Reading in file : ~s~%" filename))
+               (setq *in-in* t)
+               (obj_input (namestring (u:rel-to-cwd filename)))
+               (unless (or *top-level* *obj$input_quiet*)
+                 (format t "Done reading in file: ~s~%" filename))))
+            ((inp1= "test")
+             (ci$perform_test_reduction inp))
+            ((inp1= "call-that")
+             (if *mod_eval$open_module*
+	         (let ((obj$current_module *mod_eval$open_module*)
+		       (*mod_eval$$current_module* *mod_eval$open_module*))
+	           (module$!mark_as_needs_parse_setup *mod_eval$$current_module*)
+	           (mod_eval$$include_BOOL)
+	           (mod_eval$$!do_let (list "let" inp2 "=" nil "."))
+	           (module$!mark_as_needs_parse_setup *mod_eval$$current_module*)
+	           (when (module$is_compiled *mod_eval$$current_module*)
+	             (module$!mark_as_needs_compiling *mod_eval$$current_module*)))
+	         (progn (princ "Warning: no module open") (terpri))))
+            ((inp1= "parse")
+             (unless *obj$input_quiet*
+               (cond
+                 (*mod_eval$$last_module*
+	          (mod_eval$$!do_parse_setup *mod_eval$$last_module*)
+	          (let ((res (parse$parse *mod_eval$$last_module*
+		                          (obj$obj2_term inp2) *obj$sort_Universal*)))
+	            (setq $$term res)
+	            (unless *top-level* (princ "parse "))
+	            (print$short_sort_name (term$sort res))
+	            (princ ": ")
+	            (let ((*fancy-print* nil))
+	              (term$print res) (terpri))))
+                 (t
+	          (princ "No current module")))))
+            ((inp1-in mod_elts)
+             (cond (*mod_eval$open_module*
+	            (let ((obj$current_module *mod_eval$open_module*)
+		          (*mod_eval$$current_module* *mod_eval$open_module*))
+	              (mod_eval$!module_element inp)))
+	           (t
+	            (princ "Warning: no module open")
+                    (terpri))))
+            ((inp1= "openr")
+             (setq *mod_eval$last_before_open* nil)
+             (mod_eval$!open inp))
+            ((inp1= "open")             ;just an abbreviation
+             (when *mod_eval$open_module*
+	       (princ "Warning: module already open: ")
+	       (print$name *mod_eval$open_module*) (terpri)
+	       (princ "Closing this module") (terpri)
+	       (close_module inp)
+	       (setq *mod_eval$$current_module* *mod_eval$$last_module*))
+             (when (not (null inp2))
+	       (setq *mod_eval$$last_module*
+	             (modexp_eval$top_level_eval
+	              inp2 *mod_eval$$current_module*)))
+             (setq *mod_eval$last_before_open* *mod_eval$$last_module*)
+             (let ((*obj$allow_uninstantiated* t))
+               (if (eq 'object (module$kind *mod_eval$$last_module*))
+	           (ci$!process_definition
+	            `("obj" "%" "is" (("inc" ("THE-LAST-MODULE") ".")) "endo"))
+	           (ci$!process_definition
+	            `("th" "%" "is" (("inc" ("THE-LAST-MODULE") ".")) "endth"))))
+             (let ((obj$current_module *mod_eval$$last_module*))
+               (let ((*mod_eval$$last_module*
+	               (caar (module$sub_modules
+		              *mod_eval$$last_module*))))
+                 (mod_eval$$!add_vars_of '("vars-of" "."))))
+             (mod_eval$!open nil))
+            ((inp1= "close")
+             (close_module inp))
+                                        ;     ((inp1= "apply") ;@@
                                         ;      (ci$!apply_rule inp))
-      ((equal "start" (car inp))        ;@@ put above module_elements?
-       (misc$start inp))
-                                        ;     ((equal "start-term" (car inp))
+            ((inp1= "start")            ;@@ put above module_elements?
+             (misc$start inp))
+                                        ;     ((inp1= "start-term")
                                         ;      (misc$start_term))
-      ((equal "apply" (car inp))
-       (misc$apply inp))
+            ((inp1= "apply")
+             (misc$apply inp))
                                         ;lhh -- insert the compile command
-      ((equal "compile" (car inp))
-       (misc$compile inp))
+            ((inp1= "compile")
+             (misc$compile inp))
                                         ;lhh -- insert the run command
-      ((equal "run" (car inp)) 
-       (misc$run inp))
-      ((member (car inp) '("show" "sh" "set" "do" "select")
-	       :test #'equal)
-       (unless (and
-	        *obj$input_quiet*
-	        (or (equal "show" (car inp)) (equal "sh"(car inp))))
-         (top$commands inp))
-       )
-      ((equal "[" (car inp))
-       (setq *obj$current_labels* (mod_eval$process_labels (cadr inp))))
-      ((equal '("?") inp)
-       (obj_top_level_help))
-                                        ; DANGER these are system dependent
-      ((equal "pwd" (car inp))
-       (princ (uiop:getcwd))
-       (terpri))
-      ((equal "ls" (car inp))
-       (map nil (lambda (pathname)
-                  (fmt "~A~%" pathname))
-            (uiop:directory-files (uiop:getcwd))))
-      ((equal "cd" (car inp))
-       (uiop:chdir "../")
-       (let ((fn (expand_file_name (cadr inp))))
-         (if (probe-file (concatenate 'string fn "/")) (uiop:chdir fn)
-             (print "Directory not found")))))
-    (setq *obj$print_errors* t)
-    )))
+            ((inp1= "run") 
+             (misc$run inp))
+            ((inp1-in '("show" "sh" "set" "do" "select"))
+             (unless (and *obj$input_quiet*
+	                  (inp1-in '("show" "sh")))
+               (top$commands inp)))
+            ((inp1= "[")
+             (setq *obj$current_labels* (mod_eval$process_labels inp2)))
+            ((inp1= '("?"))
+             (obj_top_level_help))
+            ((inp1= "pwd")
+             (princ (uiop:getcwd))
+             (terpri))
+            ((inp1= "ls")
+             (map nil (lambda (pathname)
+                        (u:fmt "~A~%" pathname))
+                  (uiop:directory-files (uiop:getcwd))))
+            ((inp1= "cd")
+             (uiop:chdir "../")
+             (let ((fn (expand_file_name inp2)))
+               (if (probe-file (concatenate 'string fn "/"))
+                   (uiop:chdir fn)
+                   (print "Directory not found")))))
+          (setq *obj$print_errors* t)))
+      inp)))
 
 
 (defun close_module (inp)
@@ -483,86 +478,20 @@
 
 ; lhh -- help screen for compile command.
 (defun obj_top_level_help ()
-  (princ "Top-level definitional forms include: obj, theory, view, make")
-      (terpri)
-  (princ "The top level commands include:") (terpri)
-  (princ "  q; quit --- to exit from OBJ3") (terpri)
-  (princ "  show .... .  --- for further help: show ? .") (terpri)
-  (princ "  set .... . --- for further help: set ? .") (terpri)
-  (princ "  do .... . --- for further help: do ? .") (terpri)
-  (princ "  apply .....  --- for further help: apply ? .") (terpri)
-  (princ "  other commands:") (terpri)
-  (princ "    in <filename>") (terpri)
-  (princ "    red <term> .") (terpri)
-  (princ "    run [verbose|keep] <term> .") (terpri)
-  (princ "    compile [verbose|noopt|keep] [<module-expression>] .") (terpri)
-  (princ "    select <module-expression> .") (terpri)
-  (princ "    cd <directory>; ls; pwd") (terpri)
-  (princ "    start <term> .; show term .") (terpri)
-  (princ "    open [<module-expression>] .;")
-      (princ " openr [<module-expression>] .; close") (terpri)
-  (princ "    ev <lisp>; evq <lisp>") (terpri)
-  )
-
-#+(or LUCID CMU CLISP)
-(defun lcl () nil)
-#+(or LUCID CMU)
-(defun bye ()
-  (finish-output)
-  (quit))
-#+LUCID
-(defun usual-output-case ()
-  (and
-   (eq 'synonym-stream (type-of *standard-output*))
-   (eq '*terminal-io* (lucid::synonym-stream-symbol *standard-output*))
-   (eq 'lucid::split-stream (type-of *terminal-io*))
-   (typep (lucid::split-stream-output-stream *terminal-io*)
-	  'lucid::osi-buffered-stream)
-   ))
-#+LUCID
-(defun buffer-on ()
-  (when (usual-output-case)
-    (setf (lucid::osi-buffered-stream-auto-force
-	   (lucid::split-stream-output-stream *terminal-io*))
-	  nil)))
-#+LUCID
-(defun buffer-off ()
-  (force-output)
-  (when (usual-output-case)
-    (setf (lucid::osi-buffered-stream-auto-force
-	   (lucid::split-stream-output-stream *terminal-io*))
-	  t)))
-#+LUCID
-(defun buffer-line ()
-  (when (usual-output-case)
-    (setf (lucid::osi-buffered-stream-auto-force
-	   (lucid::split-stream-output-stream *terminal-io*))
-	  :line)))
-#+LUCID
-(defun buffer-mode ()
-  (when (usual-output-case)
-    (lucid::osi-buffered-stream-auto-force
-     (lucid::split-stream-output-stream *terminal-io*))))
-
-#+GCL
-(defun process-args ()
-  (catch *top-level-tag* (catch 'obj3-top-level-error (catch 'obj3-error
-  (let ((argc (si:argc)))
-    (when (< 1 argc)
-      (let ((i 1))
-	(loop
-	 (when (<= argc i) (return))
-	 (if (equal "-in" (si:argv i))
-	   (obj_input (si:argv (setq i (+ i 1))))
-	 (if (equal "-inq" (si:argv i))
-	   (let ((*obj$input_quiet* t))
-	     (obj_input (si:argv (setq i (+ i 1)))))
-	 (if (equal "-evq" (si:argv i))
-	     (load_file (si:argv (setq i (+ i 1))))
-	   )))
-	 (setq i (+ i 1))
-	 ))))
-  )))
-  )
-
-;; -*- mode: lisp; font-lock-mode: nil; -*-
+  (u:fmt "Top-level definitional forms include: obj, theory, view, make
+The top level commands include:
+  q; quit --- to exit from OBJ3
+  show .... .  --- for further help: show ? .
+  set .... . --- for further help: set ? .
+  do .... . --- for further help: do ? .
+  apply .....  --- for further help: apply ? .
+  other commands:
+    in <filename>
+    red <term> .
+    run [verbose|keep] <term> .
+    compile [verbose|noopt|keep] [<module-expression>] .
+    select <module-expression> .
+    cd <directory>; ls; pwd
+    start <term> .; show term .
+    open [<module-expression>] .; openr [<module-expression>] .; close
+    ev <lisp>; evq <lisp>"))

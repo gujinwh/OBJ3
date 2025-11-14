@@ -40,7 +40,7 @@
 ;        Apply feature
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package #:user)
+(in-package #:obj3)
 ; rules labels cannot contain . or start with a digit
 
 (defvar applied nil)

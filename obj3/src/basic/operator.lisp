@@ -102,7 +102,7 @@
 ; --- syntactic_type             ex:                : OneOf[latefix, antefix,
 ;                                                     juxtaposition, 
 ;                                                     unspecified]
-(in-package #:user)
+(in-package #:obj3)
 ; up to now it is represented by a structure
 
 (defstruct operator

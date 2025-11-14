@@ -49,7 +49,7 @@
 
 ;;;;;;;;;;;;;;;; Summary ;;;;;;;;;;;;;;;;
 ; omitted
-(in-package #:user)
+(in-package #:obj3)
 ; lhh - make sure we continue with comments for TRIM output
 (defvar *print$trim-comments-contin* nil) 
 

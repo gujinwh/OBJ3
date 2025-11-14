@@ -46,7 +46,7 @@
 
 ;;; % define the global state which contains the result of the history of
 ;;; % the computation of all matches. Works like a stack.
-(in-package #:user)
+(in-package #:obj3)
 (defun global_state$new ()
   nil
   )

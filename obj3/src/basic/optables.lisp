@@ -54,7 +54,7 @@
 ; op operator$highest_operator : Operator Sort Module -> Operator + nil
 
                                         ; op operator$lowest_operator_direct : Operator LIST[Sort] Module -> Operator
-(in-package #:user)
+(in-package #:obj3)
 (defun operator$lowest_operator_direct (op arity module)
   (let ((poly (operator$polymorphic op)))
   (if poly

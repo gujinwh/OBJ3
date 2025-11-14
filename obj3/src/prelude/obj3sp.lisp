@@ -51,7 +51,7 @@
 ;;;   (2) function that maps token to lisp value [read-from-string]
 ;;;   (3) function to print value [prin1]
 ;;;   (4) predicate true for lisp values of that sort
-(in-package #:user)
+(in-package #:obj3)
 (defun obj$false_fn (x) (declare (ignore x)) nil)
 (defun obj$true_fn (x) (declare (ignore x)) t)
 (defun obj$create_error (x)

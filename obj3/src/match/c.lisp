@@ -59,7 +59,7 @@
 
 ;commutative_state = record{X: int, 
 ;                 sys: system}
-(in-package #:user)
+(in-package #:obj3)
 (defstruct (C_state
 	    (:constructor make_C_state (count sys)))
 	(count 0 :type integer)

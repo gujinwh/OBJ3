@@ -40,7 +40,7 @@
 ; DANGER -- this is implementation dependent
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package #:user)
+(in-package #:obj3)
 ; These next two are used in module_eval.lsp for built-in RHSs.
 (defun make_function (lmbd)
   #+GCL lmbd

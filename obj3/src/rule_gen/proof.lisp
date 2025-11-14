@@ -53,7 +53,7 @@
 ;        add-assertions(MOD, RULE-SET, MOD1, HIERARCHY-MODE)
 
 ; op proof$prove_theorem: Module RuleSet Module HierarchyMode-> Module
-(in-package #:user)
+(in-package #:obj3)
 #|
 (defun proof$prove_theorem (MOD1 RS MOD2 HM)
    (when (and $$debug RS)

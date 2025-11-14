@@ -57,7 +57,7 @@
 ; op mapping$merge : Mapping Mapping -> Mapping
 
 ;;;;;;;;;;;;;;;;; Representation
-(in-package #:user)
+(in-package #:obj3)
 (defstruct (mapping
 	     (:conc-name mapping$)
 	     (:constructor mapping$make (name sort op module))

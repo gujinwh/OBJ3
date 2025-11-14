@@ -171,7 +171,7 @@
        (terpri))
       ((equal "ls" (car inp))
        (map nil (lambda (pathname)
-                  (fmt "~A~%" pathname))
+                  (u:fmt "~A~%" pathname))
             (uiop:directory-files (uiop:getcwd))))
       ((equal "cd" (car inp))
        (uiop:chdir "../")

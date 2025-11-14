@@ -47,7 +47,7 @@
 ;  -------------------------------------------------------------------------
 
 ;  the range of precedence (and precedence level) values is [ 0 .. 127 ] :
-(in-package #:user)
+(in-package #:obj3)
 (defconstant parser$min_precedence  0)
 (defconstant parser$max_precedence 127)
 

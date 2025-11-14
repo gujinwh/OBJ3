@@ -48,7 +48,7 @@
 ;                                    signals(no_match, E_equal)
 ; op match$next_fail : GlobalState -> GlobalState Substitution, 
 ;                                     signals(no_match) .
-(in-package #:user)
+(in-package #:obj3)
 (eval-when (eval compile)
 ;(defmacro term$is_var (x) `(atom (car ,x)))
 ; the following is okay only because of the simplicity of the uses of

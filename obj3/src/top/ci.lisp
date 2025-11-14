@@ -48,7 +48,7 @@
 ; op ci$perform_test_reduction : {Obj-State} Preterm -> {output} [input-output]
 
 ; var obj$current_module -- current module in reduction process
-(in-package #:user)
+(in-package #:obj3)
 (defvar obj$current_module nil)
 
 (defun ci$!process_definition (def)

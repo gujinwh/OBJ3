@@ -70,7 +70,7 @@
 ; --- called a "property".
 
 ; rep = structure[name: theory_name, zero: term_list]
-(in-package #:user)
+(in-package #:obj3)
 (defstruct (theory
   	     (:conc-name theory$)
 	     (:constructor theory$make (name zero)))

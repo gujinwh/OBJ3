@@ -89,7 +89,7 @@
 ;; AC_extension : the possible AC extension (list of less than 1 element)
 ;; A_extensions : the possible Associative extensions (list empty or of 3 
 ;;                elements)
-(in-package #:user)
+(in-package #:obj3)
 (defstruct (rule
 	    (:conc-name rule$))
   lhs

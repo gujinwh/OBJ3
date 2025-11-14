@@ -70,7 +70,7 @@
 ;;;;;;;;;;;;;;;; Representation
 
 ;   rep = record{sys : system, env: environment}
-(in-package #:user)
+(in-package #:obj3)
 (defstruct (match_system
 	    (:constructor match_system$create (env sys)))
 	(sys (system$new))

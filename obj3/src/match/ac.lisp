@@ -191,7 +191,7 @@
 ;;; ACZ and ACI equations are not handled, although PDL thinks they
 ;;; could be without too much pain.
 ;;;
-(in-package #:user)
+(in-package #:obj3)
 
 (defmacro dotimes-fixnum (&rest body)
   (let ((var (car (car body)))

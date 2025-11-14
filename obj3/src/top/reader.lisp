@@ -51,7 +51,7 @@
 ; op reader$!read_init : ->
 ; var *reader$eof_value* [ Constant ]
 ; op reader$is_at_eof : {Input:reader$$ch} -> Bool
-(in-package #:user)
+(in-package #:obj3)
 ;;;; READTABLE definition
 
 (defconstant reader$$char_code_limit 192) ; Parameter

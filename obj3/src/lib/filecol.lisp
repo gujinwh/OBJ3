@@ -41,7 +41,7 @@
 ; This used to get nice output line lengths; see replacement below
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package #:user)
+(in-package #:obj3)
 ;; A default version.
 (defun filecol (x) 0)
 

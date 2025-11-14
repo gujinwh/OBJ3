@@ -59,7 +59,7 @@
 ;; 2 pointeurs, one for the next rule to be returned and one for
 ;; the last rule which has been successfully apply.
 ;; Be carefull for printing! (and debugging)
-(in-package #:user)
+(in-package #:obj3)
 (defstruct rule_ring
   ring
   current

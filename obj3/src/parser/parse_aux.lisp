@@ -44,7 +44,7 @@
 
 ;;;;;;;;;;;;;;;; Summary ;;;;;;;;;;;;;;;;
 ; omitted
-(in-package #:user)
+(in-package #:obj3)
 ; op opvar$syntactic_type : Operator+Variable -> Synactic_Type
 ;  Synactic_Type: variable antefix latefix juxtaposition
 ; name: term_parser$syntactic_type

@@ -45,7 +45,7 @@
 ;;;;;;;;;;;;;;;; Representation
 
 ;; A substitution is supposed to be an association list.
-(in-package #:user)
+(in-package #:obj3)
 ;; op substitution$new: -> Substitution.
 (defmacro substitution$new ()
   '()

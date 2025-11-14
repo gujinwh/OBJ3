@@ -110,7 +110,7 @@
 ; op obj$general_invoke : Function LIST[Variable] Substitution Sort -> Term
 
                                         ; var *mod_eval$$current_module* : Module
-(in-package #:user)
+(in-package #:obj3)
 (defvar *mod_eval$$current_module* nil)
 
 (defvar obj$current_module)

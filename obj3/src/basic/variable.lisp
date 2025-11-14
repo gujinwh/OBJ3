@@ -79,7 +79,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(in-package #:user)
+(in-package #:obj3)
 
 ; Returns a new variable
 

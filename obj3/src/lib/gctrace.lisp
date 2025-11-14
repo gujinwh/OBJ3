@@ -33,7 +33,7 @@
 ;; OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ;; $Id: gctrace.lsp,v 206.1 2003/09/26 13:02:36 kiniry Exp $
-(in-package #:user)
+(in-package #:obj3)
 ; GC tracing output.
 
 ; DANGER -- this is implementation dependent.

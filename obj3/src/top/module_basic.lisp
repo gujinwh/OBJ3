@@ -45,7 +45,7 @@
 
 ;;;;;;;;;;;;;;;; Summary ;;;;;;;;;;;;;;;;
 ; omitted
-(in-package #:user)
+(in-package #:obj3)
 (defvar *mod_eval$$current_module* nil)
 (defvar obj$current_module)
 (defvar *obj$include_BOOL* nil)

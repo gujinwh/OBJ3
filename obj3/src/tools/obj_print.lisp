@@ -46,7 +46,7 @@
 
 ;;;;;;;;;;;;;;;; Summary ;;;;;;;;;;;;;;;;
 ; omitted
-(in-package #:user)
+(in-package #:obj3)
 (defvar *print$indent* 0)
 (defvar *print$indent_increment* 2)
 (defvar *print$explicit* nil) ;if t then give more detail on sorts, etc.

@@ -61,7 +61,7 @@
 ; rep = list[equation] or (nil.list[equation))
 
 ;;;;;;;;;;;;;;;;
-(in-package #:user)
+(in-package #:obj3)
 ; op environment$create: Term Term -> Environment
 (defun environment$create (t1 t2)
   (list (cons t1 t2))

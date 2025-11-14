@@ -43,7 +43,7 @@
 
 ;;;; Tim Winkler ;;;; Created: 4 August, 1986
 
-(in-package #:user)
+(in-package #:obj3)
 
 ;;;;;;;;;;;;;;;; Summary ;;;;;;;;;;;;;;;;
 ; op term$print : Term -> {Output} [I/O]

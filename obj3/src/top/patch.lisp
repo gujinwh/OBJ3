@@ -33,4 +33,4 @@
 ;; OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ;; $Id: patch.lsp,v 205.2.1.1 2003/09/23 14:04:59 kiniry Exp $
-(in-package #:user)
+(in-package #:obj3)

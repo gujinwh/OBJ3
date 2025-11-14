@@ -51,7 +51,7 @@
 ;;;; HIERARCHY OF OPERATORS
 ;;;; precedence: _[] over _*_ over _+_
 ;;;; all are left-associative
-(in-package #:user)
+(in-package #:obj3)
 ;;; checks whether a token is a valid name
 (defun token$is_name (token)
   (dotimes (i (length token) t)
@@ -130,7 +130,7 @@
 	      '("]" "," ")" "is" "to" "::" "and" ".")
 	      :test #'equal)
       e1)
-     (t (fmt "Error: module expression parsing: ~a followed by ~a~%"
+     (t (u:fmt "Error: module expression parsing: ~a followed by ~a~%"
 		e1 (car *modexp_parse$$inp*))
 	(obj3-to-top)))))
 
@@ -163,7 +163,7 @@
 	      '("]" "," ")" "is" "to" "::" "and" ".")
 	      :test #'equal)
       e1)
-     (t (fmt "Error: module expression parsing: ~a followed by ~a~%"
+     (t (u:fmt "Error: module expression parsing: ~a followed by ~a~%"
 		e1 (car *modexp_parse$$inp*))
 	(obj3-to-top)))))
 
@@ -185,31 +185,31 @@
 	      '("]" "," ")" "is" "to" "::" "+" "with" "and" ".")
 	      :test #'equal)
       e1)
-     (t (fmt "Error: module expression parsing: ~a followed by ~a~%"
+     (t (u:fmt "Error: module expression parsing: ~a followed by ~a~%"
 		e1 (car *modexp_parse$$inp*))
 	(obj3-to-top)))))
 
 (defun modexp_parse$$rename ()
   (cond
    ((null *modexp_parse$$inp*)
-    (fmt "Error: premature end of module expression in a rename~%")
+    (u:fmt "Error: premature end of module expression in a rename~%")
     (obj3-to-top))
    ((not (equal "(" (car *modexp_parse$$inp*)))
-    (fmt "Error: body of renaming should be preceded by \"(\"~%")
+    (u:fmt "Error: body of renaming should be preceded by \"(\"~%")
     (obj3-to-top))
    (t
     (modexp_parse$$skip)
     (let ((res nil))
      (loop
       (when (null *modexp_parse$$inp*)
-	(fmt "Error: ill-formed rename body~%")
+	(u:fmt "Error: ill-formed rename body~%")
 	(obj3-to-top))
       (setq res (cons (modexp_parse$$rename_elt) res))
       (when (equal ")" (car *modexp_parse$$inp*))
 	(modexp_parse$$skip)
 	(return (nreverse res)))
       (when (not (equal "," (car *modexp_parse$$inp*)))
-	(fmt "Error: renaming elements should be separated by \",\"~%")
+	(u:fmt "Error: renaming elements should be separated by \",\"~%")
 	(obj3-to-top))
       (modexp_parse$$skip)
       )))))
@@ -217,14 +217,14 @@
 (defun modexp_parse$$rename_elt ()
   (cond
    ((null *modexp_parse$$inp*)
-    (fmt "Error: premature end of renaming~%")
+    (u:fmt "Error: premature end of renaming~%")
     (obj3-to-top))
    ((equal "sort" (car *modexp_parse$$inp*))
     (let (a b)
       (modexp_parse$$skip)
       (setq a (modexp_parse$$sort_specn '("to")))
       (when (not (equal "to" (car *modexp_parse$$inp*)))
-	(fmt "Error: in renaming, for sort ~a didn't find \"to\"~%" a)
+	(u:fmt "Error: in renaming, for sort ~a didn't find \"to\"~%" a)
 	(obj3-to-top))
       (modexp_parse$$skip)
       (setq b (modexp_parse$$sort_specn '("," ")")))
@@ -234,12 +234,12 @@
       (modexp_parse$$skip)
       (setq a (modexp_parse$$op_name_specn '("to")))
       (when (not (equal "to" (car *modexp_parse$$inp*)))
-	    (fmt "Error: in renaming, for sort ~a didn't find \"to\"~%" a)
+	    (u:fmt "Error: in renaming, for sort ~a didn't find \"to\"~%" a)
 	    (obj3-to-top))
       (modexp_parse$$skip)
       (setq b (modexp_parse$$op_name_specn '("," ")")))
       `(op ,a ,b)))
-   (t (fmt "Error: found ~a when expected \"sort\" or \"op\"~%"
+   (t (u:fmt "Error: found ~a when expected \"sort\" or \"op\"~%"
 	      (car *modexp_parse$$inp*))
       (obj3-to-top))))
 
@@ -272,7 +272,7 @@
       (modexp_parse$$skip)
       (let ((args (modexp_parse$$args)))
 	(when (not (equal "]" (car *modexp_parse$$inp*)))
-         (fmt "Error: \"[\" without \"]\" in module expression~%")
+         (u:fmt "Error: \"[\" without \"]\" in module expression~%")
 	 (obj3-to-top))
 	(modexp_parse$$skip)
 	(modexp$make_instantiation m args)
@@ -283,7 +283,7 @@
 (defun modexp_parse$$args ()
   (cond
    ((null *modexp_parse$$inp*)
-    (fmt "Error: end of input in argument list~%")
+    (u:fmt "Error: end of input in argument list~%")
     (obj3-to-top))
    ((equal "]" (car *modexp_parse$$inp*)) nil)
    (t (let ((res nil))
@@ -292,7 +292,7 @@
      (when (equal "]" (car *modexp_parse$$inp*))
        (return (nreverse res)))
      (when (not (equal "," (car *modexp_parse$$inp*)))
-       (fmt "Error: in instantation, need \",\" between arguments~%")
+       (u:fmt "Error: in instantation, need \",\" between arguments~%")
        (obj3-to-top))
      (modexp_parse$$skip)
    )))))
@@ -300,7 +300,7 @@
 (defun modexp_parse$$arg ()
   (cond
    ((null *modexp_parse$$inp*)
-    (fmt "Error: end of input in argument to parameterized module~%")
+    (u:fmt "Error: end of input in argument to parameterized module~%")
     (obj3-to-top))
    ((equal "view" (car *modexp_parse$$inp*))
     (modexp_parse$$view))
@@ -365,12 +365,12 @@
 	(setq th 'none)
         (setq th (modexp_parse$$parser)))
       (when (not (equal "to" (car *modexp_parse$$inp*)))
-	(fmt "Error: expecting \"to\" in view~%")
+	(u:fmt "Error: expecting \"to\" in view~%")
 	(obj3-to-top))
       (modexp_parse$$skip)
       (setq m (modexp_parse$$general))
       (when (not (equal "is" (car *modexp_parse$$inp*)))
-        (fmt "Error: expecting \"is\" in view~%")
+        (u:fmt "Error: expecting \"is\" in view~%")
         (obj3-to-top))
       (modexp_parse$$skip)
       (if (equal "endv" (car *modexp_parse$$inp*))
@@ -378,7 +378,7 @@
 	(progn
 	  (setq mppg (modexp_parse$$view_mapping))
 	  (when (not (equal "endv" (car *modexp_parse$$inp*)))
-	    (fmt "Error: expecting \"endv\" in view~%")
+	    (u:fmt "Error: expecting \"endv\" in view~%")
 	    (obj3-to-top))
 	  (modexp_parse$$skip)))
       (modexp$make_view th m mppg)
@@ -386,22 +386,22 @@
    ((token$is_name (car *modexp_parse$$inp*))
     (prog1 (car *modexp_parse$$inp*) (modexp_parse$$skip)))
    (t
-    (fmt "Error: in view not expecting ~a~%" (car *modexp_parse$$inp*))
+    (u:fmt "Error: in view not expecting ~a~%" (car *modexp_parse$$inp*))
     (obj3-to-top))))
 
 (defun modexp_parse$$view_mapping ()
   (cond
    ((null *modexp_parse$$inp*)
-    (fmt "Error: premature end of module expression in a view~%")
+    (u:fmt "Error: premature end of module expression in a view~%")
     (obj3-to-top))
    (t (let ((res nil))
      (loop
       (when (null *modexp_parse$$inp*)
-	(fmt "Error: ill-formed view body~%")
+	(u:fmt "Error: ill-formed view body~%")
 	(obj3-to-top))
       (setq res (cons (modexp_parse$$view_elt) res))
       (when (not (equal "." (car *modexp_parse$$inp*)))
-	(fmt "Error: view elements should be terminated by \".\"~%")
+	(u:fmt "Error: view elements should be terminated by \".\"~%")
 	(obj3-to-top))
       (modexp_parse$$skip)
       (when (equal "endv" (car *modexp_parse$$inp*))
@@ -411,14 +411,14 @@
 (defun modexp_parse$$view_elt ()
   (cond
    ((null *modexp_parse$$inp*)
-    (fmt "Error: premature end of view body~%")
+    (u:fmt "Error: premature end of view body~%")
     (obj3-to-top))
    ((equal "sort" (car *modexp_parse$$inp*))
     (let (a b)
       (modexp_parse$$skip)
       (setq a (modexp_parse$$sort_specn '("to")))
       (when (not (equal "to" (car *modexp_parse$$inp*)))
-	(fmt "Error: in view body, for sort ~a didn't find \"to\"~%" a)
+	(u:fmt "Error: in view body, for sort ~a didn't find \"to\"~%" a)
 	(obj3-to-top))
       (modexp_parse$$skip)
       (setq b (modexp_parse$$sort_specn '(".")))
@@ -444,11 +444,11 @@
 	  (setq sa (car *modexp_parse$$inp*))
 	  (modexp_parse$$skip))
 	(when (not (equal ":" (car *modexp_parse$$inp*)))
-	  (fmt "Error: expecting a \":\"~%") (obj3-to-top))
+	  (u:fmt "Error: expecting a \":\"~%") (obj3-to-top))
 	(modexp_parse$$skip))
       (setq a (modexp_parse$$op_name '("to")))
       (when (not (equal "to" (car *modexp_parse$$inp*)))
-	    (fmt "Error: in view body, for op ~a didn't find \"to\"~%" a)
+	    (u:fmt "Error: in view body, for op ~a didn't find \"to\"~%" a)
 	    (obj3-to-top))
       (modexp_parse$$skip)
       (when *obj$obj2_mode*
@@ -456,11 +456,11 @@
 	  (setq sb (car *modexp_parse$$inp*))
 	  (modexp_parse$$skip))
 	(when (not (equal ":" (car *modexp_parse$$inp*)))
-	  (fmt "Error: expecting a \":\"~%") (obj3-to-top))
+	  (u:fmt "Error: expecting a \":\"~%") (obj3-to-top))
 	(modexp_parse$$skip))
       (setq b (modexp_parse$$op_name '(".")))
       `(op (,sa ,a) (,sb ,b))))
-   (t (fmt "Error: found ~a when expected \"sort\" or \"op\"~%"
+   (t (u:fmt "Error: found ~a when expected \"sort\" or \"op\"~%"
 	      (car *modexp_parse$$inp*))
       (obj3-to-top))))
 
@@ -473,13 +473,13 @@
        ((equal ")" (car *modexp_parse$$inp*))
 	(modexp_parse$$skip)
 	m)
-       (t (fmt "Error: unmatched \"(\" in module expression after ~a~%"
+       (t (u:fmt "Error: unmatched \"(\" in module expression after ~a~%"
 		  m)
 	  (obj3-to-top))
        )))
    ((token$is_name (car *modexp_parse$$inp*))
     (prog1 (car *modexp_parse$$inp*) (modexp_parse$$skip)))
-   (t (fmt "Error: Can't make sense of ~a in module expression~%"
+   (t (u:fmt "Error: Can't make sense of ~a in module expression~%"
 	      (car *modexp_parse$$inp*))
       (obj3-to-top))
   ))
@@ -487,13 +487,13 @@
 (defun modexp_parse$$op_spec ()
   (cond
    ((null *modexp_parse$$inp*)
-    (fmt "Error: end of input at operation spec. in rename~%")
+    (u:fmt "Error: end of input at operation spec. in rename~%")
     (obj3-to-top))
    ((equal "(" (car *modexp_parse$$inp*))
     (modexp_parse$$balanced_parens))
    ((token$is_name (car *modexp_parse$$inp*))
     (prog1 (car *modexp_parse$$inp*) (modexp_parse$$skip)))
-   (t (fmt "Error: incorrect operator specification in a rename~%")
+   (t (u:fmt "Error: incorrect operator specification in a rename~%")
       (obj3-to-top))
   ))
 
@@ -512,7 +512,7 @@
 (defun modexp_parse$$op_specn (cntxt)
   (cond
    ((null *modexp_parse$$inp*)
-    (fmt "Error: end of input at operation specification~%")
+    (u:fmt "Error: end of input at operation specification~%")
     (obj3-to-top))
    ((equal "(" (car *modexp_parse$$inp*))
     (modexp_parse$$skip)
@@ -554,7 +554,7 @@
   (let ((res nil))
   (loop
    (when (null *modexp_parse$$inp*)
-     (fmt "Error: end of input in operator pattern~%")
+     (u:fmt "Error: end of input in operator pattern~%")
      (princ "beginning of pattern: ")
      (print$simple_princ_open (nreverse res))
      (terpri)
@@ -570,7 +570,7 @@
 (defun modexp_parse$$op_name_specn (cntxt)
   (cond
    ((null *modexp_parse$$inp*)
-    (fmt "Error: end of input at operation specification~%")
+    (u:fmt "Error: end of input at operation specification~%")
     (obj3-to-top))
    ((equal "(" (car *modexp_parse$$inp*))
     (modexp_parse$$skip)
@@ -630,7 +630,7 @@
      (if (null cntxt)
 	 (return)
        (progn
-	 (fmt "Error: end of input in operator pattern~%")
+	 (u:fmt "Error: end of input in operator pattern~%")
 	 (princ "beginning of pattern: ")
 	 (print$simple_princ_open (nreverse res))
 	 (terpri)
@@ -646,7 +646,7 @@
 (defun modexp_parse$$sort_specn (cntxt)
   (cond
    ((null *modexp_parse$$inp*)
-    (fmt "Error: end of input at sort specification~%")
+    (u:fmt "Error: end of input at sort specification~%")
     (obj3-to-top))
    ((equal "(" (car *modexp_parse$$inp*))
     (modexp_parse$$skip)

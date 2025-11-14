@@ -81,7 +81,7 @@
 ;;   (concatenate 'string (string x) (string y)))
 
 ;; the "is_" part is not needed -- Sula Ma
-(in-package #:user)
+(in-package #:obj3)
 (defmacro defrepr (module_prefix name tag elts)
   `(defstruct (,tag
                 (:conc-name ,module_prefix)

@@ -39,7 +39,7 @@
 ;; This is necessary for efficient memoization.  This provides more
 ;; functions than necessary hasheq should have been part of Common
 ;; Lisp.
-(in-package #:user)
+(in-package #:obj3)
 (defun hashequal (x) (sxhash x))
 
 #+GCL

@@ -41,7 +41,7 @@
 ; The intention is to only use this for printing
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package #:user)
+(in-package #:obj3)
 
 #+GCL
 (defCfun "static object addr_of(x) object x;" :int

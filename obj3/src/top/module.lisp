@@ -106,7 +106,7 @@
 ; op module$!operator_mark_strictly_overloaded : Module Operator -> {Module}
 ; op module$operator_polymorphic : Module Operator -> Function+False
 ; op module$!operator_make_polymorphic : Module Operator Function -> {Module}
-(in-package #:user)
+(in-package #:obj3)
 (defstruct (module
 	    (:conc-name module$)
 	    (:constructor module$make)

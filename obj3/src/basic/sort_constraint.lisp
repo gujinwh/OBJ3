@@ -53,7 +53,7 @@
 
 ; op sort_constraint$create : Operator Operator LIST[Variables] Term ->
                                         ;        Sort_Constraint
-(in-package #:user)
+(in-package #:obj3)
 
 (defun sort_constraint$create (op1 op2 vars cnd)
   (list 'sort_constraint op1 op2 vars cnd))

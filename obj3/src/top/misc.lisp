@@ -51,7 +51,7 @@
 ; lhh: specify where the TRIM images live
 ;;(defvar *trim-dir*)
 ;;(setq *trim-dir* "/home/faculty/hamel/bin/")
-(in-package #:user)
+(in-package #:obj3)
 (defvar *obj$try* nil) ; for experimental features
 (defvar reduce-conditions)
 (defvar obj$verbose nil)

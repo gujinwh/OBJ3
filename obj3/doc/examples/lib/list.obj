@@ -15,6 +15,10 @@ obj LIST[X :: TRIV] is
   eq tail E L = L .
 endo
 
+eof *** F5 then delete or comment this line then again F5 to evaluate the whole file
+    
 obj NatList is
 pr LIST[NAT] .
 endo
+
+red 1 2 .

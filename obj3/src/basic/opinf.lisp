@@ -42,7 +42,7 @@
 ;; This file defines a replacement definition for optable$operator_info
 ;; which is defined in optables and can be omitted.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package #:user)
+(in-package #:obj3)
 (Clines
 "static object getopfinfofn;"
 

@@ -48,7 +48,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; a group related to operator theories/attributes and rules
-(in-package #:user)
+(in-package #:obj3)
 (defvar *mod_eval$$current_module* nil)
 (defvar obj$current_module)
 (defvar *mod_eval$$last_module* nil)

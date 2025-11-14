@@ -51,7 +51,7 @@
 ; op rew$!apply_rules: Term List[Int] List[Int] -> Term~
 ; op rew$!apply_rules_with_same_top_on_top: Term Rule_Ring -> Set[Occurrence] 
 ; op rew$!apply_rules_with_different_top_on_top: Term Rule_Set -> ~Term Bool
-(in-package #:user)
+(in-package #:obj3)
 (defvar rew$clean_memo_in_normalize nil)
 
 ; The present code is inspired from the rewrite engine of OBJ2, written

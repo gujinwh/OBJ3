@@ -79,16 +79,20 @@
                              (:file "obj_trace")
                              (:file "tools")))
                (:module "top"
-                :components ((:file "top")
+                :components ((:file "reader")
+                             (:file "top")
                              (:file "apply")
                              (:file "ci")
                              (:file "misc")
                              (:file "print")
-                             (:file "reader")
+                             
                              (:file "module")
                              (:file "module_eval")
                              (:file "module_basic")
                              (:file "module_other")
                              (:file "module_parse")))
                (:file "run"))
-  :in-order-to ((test-op (test-op "obj3-test"))))
+  :in-order-to ((test-op (test-op "obj3-test")))
+  :build-operation program-op
+  :build-pathname "../obj3"
+  :entry-point "obj3::start-obj3")

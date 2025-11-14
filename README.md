@@ -1,28 +1,33 @@
-kQuickstart 
+# Quickstart 
 
-add to .sbclrc:
+Add to .sbclrc:
 
+```
 (asdf:initialize-source-registry
  `(:source-registry (:tree (:home "code/lisp/obj3/"))
                     #+nil(:directory ,(home "/code/lisp2/sicl/SICL/Grammar"))
-                    :inherit-configuration))
+                    :inherit-configuration)) 
+```
+                    
 then launch sbcl and execute
-(asdf:load-system :obj3)
+```(asdf:load-system :obj3)
 (progn (in-package :obj3) (user::obj3-top-level))
-
+```
 To create an executable:
+```
 sbcl --load obj3/deploy.lisp
+```
 
-To install the emacs editor plugin add "obj3/emacs plugin/.emacs" contents to your ~/.emacs file.
-M-x (alt-x) run-obj3 
-then C-x C-f (control x then  control f) and open a file with the extension .obj
+To install the emacs editor plugin [copy the contents of this file](/obj3/emacs plugin/.emacs) into to your ~/.emacs file.
+
+M-x (alt-x) run-obj3 then C-x C-f (control x then  control f) and open a file with the extension .obj
 
 Use F12 to evaluate a code paragraph and F5 to evaluate a whole file.
 
 When coding it is useful to use "eof" to tell it that you don't want anything afterwards to be loaded. 
 
 For example:
-
+```
 obj LIST[X :: TRIV] is
   sorts List NeList .
   op nil : -> List .
@@ -47,10 +52,11 @@ pr LIST[NAT] .
 endo
 
 red 1 2 .
-
-Other useful emacs shortcuts:
+```
+## Other useful emacs shortcuts:
+```
 C-x o     go to the other split
-You can bind this to alt-left arrow and alt-right arrow using this code (add it to ~/.emacs):
+;;; You can bind this to alt-left arrow and alt-right arrow using this code (add it to ~/.emacs):
 (global-set-key (kbd "<M-left>") (lambda () (interactive) (other-window -1)))
 (global-set-key (kbd "<M-right>") (lambda () (interactive) (other-window 1)))
 
@@ -60,13 +66,13 @@ C-0 0 delete split
 
 (global-set-key (kbd "H-<left>") 'previous-buffer)
 (global-set-key (kbd "H-<right>") 'next-buffer)
-H is the context-menu key (which can for convenience be remapped to caps-lock if one wishes)
-
+;;; H is the context-menu key (which can for convenience be remapped to caps-lock if one wishes)
+```
 OBJ3F1 2.11
 F1 means "fork 1" (this fork) which does not intend to remain compatible with the old Common Lisp implementations.
 OBJ3 is the ancestor of CafeOBJ and Maude. It is coded in Common Lisp and has a couple of features (eg. Default Views) which make it very attractive for exploratory programming.
 
-Changes
+# Changes
 
 OBJ3F1 2.11  reorganized the code, now it uses ASDF and runs on SBCL (tested with SBCL 2.5.10 on Windows)
 
@@ -104,10 +110,10 @@ Module expressions allow complex combinations of already defined modules, includ
 
 OBJ3 has a facility for controlled rewriting which can be used for equational theorem proving.
 
-TODO list for OBJ3
-    Clean up source code (remove unused/redundant code, add more documentation).
-    Re-investigate old bug reports for the 2.04 release.
-    Integrate FOOPS into the release.
-    Integrate TOOR into the release.
-    Integrate EqLog into the release.
-    Integrate 2OBJ into the release.
+### TODO list for OBJ3
+   * Clean up source code (remove unused/redundant code, add more documentation).
+   * Re-investigate old bug reports for the 2.04 release.
+   * Integrate FOOPS into the release.
+   * Integrate TOOR into the release.
+   * Integrate EqLog into the release.
+   * Integrate 2OBJ into the release.

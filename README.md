@@ -11,7 +11,7 @@ Add to .sbclrc:
                     
 then launch sbcl and execute
 ```(asdf:load-system :obj3)
-(progn (in-package :obj3) (user::obj3-top-level))
+(progn (in-package :obj3) (obj3::obj3-top-level))
 ```
 To create an executable:
 ```
@@ -70,7 +70,7 @@ C-0 0 delete split
 ```
 OBJ3F1 2.11
 F1 means "fork 1" (this fork) which does not intend to remain compatible with the old Common Lisp implementations.
-OBJ3 is the ancestor of CafeOBJ and Maude. It is coded in Common Lisp and has a couple of features (eg. Default Views) which make it very attractive for exploratory programming.
+OBJ3 is the ancestor of CafeOBJ and Maude. It is coded in Common Lisp and has a couple of features (eg. Parameterized Programming with Default Views) which make it very attractive for exploratory programming.
 
 # Changes
 

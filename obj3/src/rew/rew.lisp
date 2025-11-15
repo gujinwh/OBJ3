@@ -80,16 +80,13 @@
    term
    (if rew$clean_memo_in_normalize
        (memo_rew$clean_memo_table *memo_rew$table*)
-     *memo_rew$table*)
-   )
-  term
-  )
+     *memo_rew$table*))
+  term)
 
-;like normalize but doesn't clear hash-table
+;;;; like normalize but doesn't clear hash-table
 (defun rew$!normalize_term (term)
   (rew$!normalize_with_memo term *memo_rew$table*)
-  term
-  )
+  term)
 
 ;; normalize returns a booleen which is true iff the term
 ;; to normalize was already in normal form (equivalent to

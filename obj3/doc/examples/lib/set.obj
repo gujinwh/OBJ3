@@ -33,3 +33,8 @@ obj SET[X :: TRIV] is
   cq #({ X } + S) = # S if X in S .
   cq #({ X } + S) = 1 + # S if not X in S .
 endo
+
+eof
+    
+red in SET[INT] : { 1 } .
+    

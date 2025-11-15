@@ -533,10 +533,10 @@
     ;&&&& >< could overwrite old view
     (modexp$make_view_from src_mod dst_mod
         (append
-	 (sort sortmap
+	 (cl:sort sortmap
 	       #'ob<
 	       :key #'(lambda (x) (sort$name (cadr x))))
-	 (sort op_mapping
+	 (cl:sort op_mapping
 	       #'ob<
 	       :key #'(lambda (x)
 			(let ((val (term$head (cadr x))))

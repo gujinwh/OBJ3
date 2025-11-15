@@ -42,84 +42,83 @@
 
 (in-package #:obj3)
 
-#+GCL (progn
+#+GCL
+(progn
+  (defun full-backtrace (&optional (start 0) (limit si::*ihs-top*))
+    (when (< limit 0) (setq limit (- si::*ihs-top* limit)))
+    (princ  "Backtrace: " *error-output*)
+    (do* ((i (+ si::*ihs-base* start) (1+ i))
+          (b nil))
+         ((> i limit) (terpri *error-output*))
+      (let ((fname (si::ihs-fname i)))
+        (when b (princ " > " *error-output*))
+        (if (= i si::*current-ihs*)
+            (write fname
+                   :stream *error-output*
+                   :escape t
+                   :case :upcase)
+            (write fname
+                   :stream *error-output*
+                   :escape t
+                   :case :downcase))
+        (setq b t)))
+    (values))
 
-        (defun full-backtrace (&optional (start 0) (limit si::*ihs-top*))
-          (when (< limit 0) (setq limit (- si::*ihs-top* limit)))
-          (princ  "Backtrace: " *error-output*)
-          (do* ((i (+ si::*ihs-base* start) (1+ i))
-                (b nil))
-               ((> i limit) (terpri *error-output*))
-            (let ((fname (si::ihs-fname i)))
-              (when b (princ " > " *error-output*))
-              (if (= i si::*current-ihs*)
-                  (write fname
-                         :stream *error-output*
-                         :escape t
-                         :case :upcase)
-                  (write fname
-                         :stream *error-output*
-                         :escape t
-                         :case :downcase))
-              (setq b t)))
-          (values))
+  (defun fb () (full-backtrace 0 -1))
 
-        (defun fb () (full-backtrace 0 -1))
+  (defmacro ihs-vs-m (x y)
+    (let ((chk (find-symbol "IHS-BASE" 'system)))
+      (if chk `(,chk ,x ,y)
+          `(,(find-symbol "VS" 'system) (+ (,(find-symbol "IHS-VS" 'system) ,x) ,y)))))
 
-        (defmacro ihs-vs-m (x y)
-          (let ((chk (find-symbol "IHS-BASE" 'system)))
-            (if chk `(,chk ,x ,y)
-                `(,(find-symbol "VS" 'system) (+ (,(find-symbol "IHS-VS" 'system) ,x) ,y)))))
+  (defun lcl (&optional (offset 0))
+    (ihs-vs-m si::*current-ihs* offset))
 
-        (defun lcl (&optional (offset 0))
-          (ihs-vs-m si::*current-ihs* offset))
+  (defun system::*bak-prin* (x p)
+    (let ((*standard-output* p)) (print$struct x)))
+  (defvar system::*backtrace-printer* 'system::*bak-prin*)
+  (defvar system::*backtrace-all* t)
 
-        (defun system::*bak-prin* (x p)
-          (let ((*standard-output* p)) (print$struct x)))
-        (defvar system::*backtrace-printer* 'system::*bak-prin*)
-        (defvar system::*backtrace-all* t)
+  (defun bt ()
+    (princ  "Backtrace: " *error-output*) (terpri *error-output*)
+    (do* ((i system::*ihs-base* (1+ i)))
+         ((> i system::*ihs-top*) (terpri *error-output*))
+      (let ((fname (system::ihs-fname i)))
+        (when (or system::*backtrace-all* (system::ihs-visible fname))
+          (princ "-----------------------  ")
+          (if (= i system::*current-ihs*)
+              (write fname
+                     :stream *error-output*
+                     :escape t
+                     :case :upcase)
+              (write fname
+                     :stream *error-output*
+                     :escape t
+                     :case :downcase))
+          (terpri *error-output*)
+          (funcall system::*backtrace-printer*
+                   (ihs-vs-m i 0) *error-output*)
+          (terpri *error-output*))))
+    (values))
 
-        (defun bt ()
-          (princ  "Backtrace: " *error-output*) (terpri *error-output*)
-          (do* ((i system::*ihs-base* (1+ i)))
-               ((> i system::*ihs-top*) (terpri *error-output*))
-            (let ((fname (system::ihs-fname i)))
-              (when (or system::*backtrace-all* (system::ihs-visible fname))
-                (princ "-----------------------  ")
-                (if (= i system::*current-ihs*)
-                    (write fname
-                           :stream *error-output*
-                           :escape t
-                           :case :upcase)
-                    (write fname
-                           :stream *error-output*
-                           :escape t
-                           :case :downcase))
-                (terpri *error-output*)
-                (funcall system::*backtrace-printer*
-                         (ihs-vs-m i 0) *error-output*)
-                (terpri *error-output*))))
-          (values))
-
-        (defun bak ()
-          (princ  "Backtrace: " *error-output*) (terpri *error-output*)
-          (do* ((i system::*ihs-top* (1- i)))
-               ((< i system::*ihs-base*) (terpri *error-output*))
-            (let ((fname (system::ihs-fname i)))
-              (when (or system::*backtrace-all* (system::ihs-visible fname))
-                (princ "-----------------------  ")
-                (if (= i system::*current-ihs*)
-                    (write fname
-                           :stream *error-output*
-                           :escape t
-                           :case :upcase)
-                    (write fname
-                           :stream *error-output*
-                           :escape t
-                           :case :downcase))
-                (terpri *error-output*)
-                (funcall system::*backtrace-printer*
-                         (ihs-vs-m i 0) *error-output*)
-                (terpri *error-output*))))
-          (values))
-        )
+  (defun bak ()
+    (princ  "Backtrace: " *error-output*) (terpri *error-output*)
+    (do* ((i system::*ihs-top* (1- i)))
+         ((< i system::*ihs-base*) (terpri *error-output*))
+      (let ((fname (system::ihs-fname i)))
+        (when (or system::*backtrace-all* (system::ihs-visible fname))
+          (princ "-----------------------  ")
+          (if (= i system::*current-ihs*)
+              (write fname
+                     :stream *error-output*
+                     :escape t
+                     :case :upcase)
+              (write fname
+                     :stream *error-output*
+                     :escape t
+                     :case :downcase))
+          (terpri *error-output*)
+          (funcall system::*backtrace-printer*
+                   (ihs-vs-m i 0) *error-output*)
+          (terpri *error-output*))))
+    (values)))

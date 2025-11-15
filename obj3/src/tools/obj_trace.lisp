@@ -71,9 +71,6 @@
 (defun obj_trace_reset ()
   (setq obj_trace_time 0))
 
-(defmacro obj_trace (&rest l)
-  `(obj_trace_fn ',l))
-
 (defun obj_trace_fn (&optional (l nil))
   (if (null l) obj_traced_functions
     (mapcar #'obj_trace_function l)))
@@ -172,8 +169,6 @@
 (defun obj_trace_force_output ()
   (when obj_trace_force (force-output)))
 
-(defmacro obj_untrace (&rest l)
-  `(obj_untrace_fn ',l))
 
 (defun obj_untrace_fn (l)
   (mapcar #'obj_untrace_function
@@ -205,10 +200,6 @@
        (let ((body (function-body fn)))
 	 (and (consp (car body))
 	      (equal 'obj_trace_call (car (car body)))))))
-
-; quiet versions produce no output, but are recorded in the context
-(defmacro obj_trace_quiet (&rest l)
-  `(obj_trace_quiet_fn ',l))
 
 (defun obj_trace_quiet_fn (&optional (l nil))
   (if (null l) obj_traced_functions

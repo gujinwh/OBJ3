@@ -68,3 +68,14 @@
   ("4" 'ok2)
   ("1" 'ok3))
 |#
+
+(defun chdir (new-wd &optional (silent? t))
+  #+c(when (stringp new-wd)
+    (setf new-wd (parse-namestring new-wd)))
+  (uiop:chdir new-wd)
+  (setf *default-pathname-defaults*
+        (parse-namestring (uiop:getcwd)))
+					;(break "in perform :after: ~A" *default-pathname-defaults*)
+  #-windows (uiop:chdir new-wd)
+  (unless silent? (format t "Current working directory changed to: ~A~%"
+                          *default-pathname-defaults*)))

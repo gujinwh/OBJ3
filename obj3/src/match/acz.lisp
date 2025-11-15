@@ -192,10 +192,6 @@
 ;;; Implementation note:  For now, only ACZ matching is implemented.  
 ;;; ACZ and ACI equations are not handled, although PDL thinks they
 ;;; could be without too much pain.
-;;;
-
-;; @note kiniry 25 Sept 2003 - incfa defined in ac.lsp already.
-;; (defmacro incfa (x) `(setf ,x (1+ ,x)))
 
 ;; @note kiniry 25 Sept 2003 - make-array1 and make-array2 defined in
 ;; ac.lsp already.
@@ -244,53 +240,6 @@
 (defstruct trivial-acz-state
   (sys nil)
   (no-more-p nil))
-
-;; small utility.  Side effect.
-(defmacro ACZ$$Rotate-Left (array m)
-"; shifts the element one bit to the left"
-  `(setf (aref ,array ,m)
-	 (* 2 (aref ,array ,m))))
-
-;; @note kiniry 25 Sept 2003 - delete-one-term defined in ac.lsp already.
-;; (defun delete-one-term (x y)
-;;   (if (term$equational_equal x (caar y)) (cdr y)
-;;       (let ((last y) (rest (cdr y)))
-;;         (loop
-;;            (when (null rest) (return 'none))
-;;            (when (term$equational_equal x (caar rest))
-;;              (rplacd last (cdr rest))
-;;              (return y))
-;;            (setq last rest  rest (cdr rest))))))
-
-(defmacro ACZ$$note-repeats (mset array max gcd)
-"; puts all repeated terms together in the list, and bashes the array
- ; (into numbers) in locations corresponding to the duplicate terms. 
- ; returns the newly grouped permutation of list.
- ; e.g. for input (a b c c c d d e f f) and #(0 0 0 0 0 0 0 0 0),
- ; this should make the array into #(0 0 3 2 1 2 1 0 2 1)."
-  `(let* ((list2 nil)
-	 (counter (array-dimension ,array 0)) )
-    (dolist (element ,mset)
-	    (let ((n (cdr element)))
-	      (declare (fixnum n))
-	    (when (> n ,max)
-		  (setq ,max n))
-	    (setq ,gcd (gcd ,gcd n))
-	    (if (> n 1) ; if it is repeated at all
-		(dotimes-fixnum (x n)
-			 (push (first element) list2)
-			 (setq counter (1- counter))
-			 (setf (aref ,array counter) (1+ x)))
-	        (progn (push (first element) list2)
-		       (setq counter (1- counter))
-		       (setf (aref ,array counter) 0))))) ; this line optional
-    list2))                                     ; (if 0'd array is guaranteed)
-
-(defmacro ACZ$$eq-member (term list)
- "predicate. true if term is term$equational_equal some element of list"
-  `(dolist (term2 ,list)
-      (when (term$equational_equal ,term (car ,list))
-	    (return t))))
 
 (defun ACZ$state_initialize (sys env)
 "; takes a system of equations and an environment, and 
@@ -690,34 +639,6 @@
 	     (t ; this row (m) is already maxed
 	      (setf (aref rhs-c-sol m) 1) ; reset this row
 	      (setq m (1+ m)))))) ; go to next row
-
-;; don't even think of using this again
-(defmacro ACZ$$collapse-one-array-internal (rhs-sol rhs-array)
-  `(dotimes-fixnum (j (array-dimension ,rhs-sol 0))
-	    (when (> (logand (aref ,rhs-sol j) term-code) 0)
-		  (push  (car (aref ,rhs-array j)) rhs-subterms))))
-
-;; don't even think of using this again
-(defmacro ACZ$$collapse-arrays-internal (lhs skip) 
-  `(dotimes-fixnum (i (array-dimension ,lhs 0))
-      (if (< i ,skip)
-          nil
-          (progn 
-	(setq rhs-subterms nil)
-	(setq term-code (* 2 term-code))
-	(ACZ$$collapse-one-array-internal rhs-c-sol rhs-c)
-	(ACZ$$collapse-one-array-internal rhs-f-sol rhs-f)
-;	(print$brief (car (aref ,lhs i)))
-;       (map nil #'print$brief rhs-subterms)
-	(system$add_eq 
-	 new-sys 
-	 (match_equation$create (car (aref ,lhs i))
-                  (if (null rhs-subterms)
-		    (term$make_zero (aref ops (cdr (aref ,lhs i))))
-		  (if (cdr rhs-subterms) ; implies length is greater than 1
-		      (term$make_right_assoc_normal_form_with_sort_check
-		          (aref ops (cdr (aref ,lhs i))) rhs-subterms)
-		      (first rhs-subterms)))))))))
 
 ;; note that this relies on side effects of the macro above.
 (defun ACZ$$solution_from_state (state)

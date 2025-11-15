@@ -456,7 +456,7 @@ obj FLOAT is
  bq X >= Y = (if (and (numberp X) (numberp Y))
                (>= X Y)
 		(throw 'rule_failure nil)) .
- bq (X =[ Z ] Y) = (if (and (numberp X) (numberp Y) (numperp Z))
+ bq (X =[ Z ] Y) = (if (and (numberp X) (numberp Y) (numberp Z))
                (< (abs (- X Y)) Z)
 		(throw 'rule_failure nil)) .
 endo

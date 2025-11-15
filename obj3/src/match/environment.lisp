@@ -155,12 +155,6 @@
       (rplacd env (push eq (cdr env))))
   )
 
-; returns a copy of one level of the environment
-
-; op environment$copy1: Environment -> Environment .
-(defmacro environment$copy1 (env)
-  `(copy-list ,env))
-
 ; op environment$environment2substitution: Environment -> Substitution
 (defun environment$environment2substitution (env)
   env ;; was (env) [ck: Dec  2 87]

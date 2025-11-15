@@ -261,51 +261,44 @@
   (let* ((new_sys (system$new))
  	 (sz (A_state-size A_st))
 	 (sys (A_state-sys A_st))
-	 (op (A_state-operator A_st))
-	 )
+	 (op (A_state-operator A_st)))
     (declare (fixnum sz)
 	     (type (vector t) sys))
-    (if (A_state-no_more A_st)	
-	; there is no more A_state
+    (if (A_state-no_more A_st)
+	;; there is no more A_state
 	(values nil nil t)
         (progn
-	  (dotimes-fixnum (k sz)	; k = 0,...,sz-1
-		   ;; i.e. for each equation of the system
-		   (let* ((eq_comp (aref sys k))
-			  (sz_left (equation_comp-sz_left eq_comp))
-			  (left (equation_comp-left eq_comp))
-			  (right (equation_comp-right eq_comp))
-			  (sz_right (1- (the fixnum (length right))))
-			  (comp (equation_comp-comp eq_comp)))
-		     (declare (fixnum sz_left sz_right)
-			      (type (vector t) left right)
-			      (type (vector fixnum) comp))
-		     (dotimes-fixnum (l sz_left) ; l = 0,...,sz_left - 1
-		       ;; i.e. for each term of the left hand 
-		       ;; side of the equation 
-		       (let ((deb (if (= l 0)
-				      0 
-				      (aref comp (the fixnum (- l 1)))))
-			     (fin (if (= l (the fixnum (- sz_left 1)))
-				      sz_right 
-				      (the fixnum (- (aref comp l) 1)))))
-			 (declare (fixnum deb fin))
-			 (system$add_eq
-			  new_sys
-			  (match_equation$create 
-			   (aref left l)
-			   (a$$make_term op right deb fin)
-			   ))
-			 ) ;; let
-		       ) ;; do
-		     )
-		   ) ;; do
+	  (dotimes-fixnum (k sz)	; k = 0,...,sz-1 i.e. for each equation of the system
+	   (let* ((eq_comp (aref sys k))
+		  (sz_left (equation_comp-sz_left eq_comp))
+                  (left (equation_comp-left eq_comp))
+		  (right (equation_comp-right eq_comp))
+		  (sz_right (1- (the fixnum (length right))))
+		  (comp (equation_comp-comp eq_comp)))
+	     (declare (fixnum sz_left sz_right)
+		      (type (vector t) left right)
+		      (type (vector fixnum) comp))
+	     (dotimes-fixnum (l sz_left) ; l = 0,...,sz_left - 1
+		             ;; i.e. for each term of the left hand 
+		             ;; side of the equation 
+		             (let ((deb (if (= l 0)
+				            0 
+				            (aref comp (the fixnum (- l 1)))))
+			           (fin (if (= l (the fixnum (- sz_left 1)))
+				            sz_right 
+				            (the fixnum (- (aref comp l) 1)))))
+			       (declare (fixnum deb fin))
+			       (system$add_eq
+			        new_sys
+			        (match_equation$create 
+			         (aref left l)
+			         (a$$make_term op right deb fin)
+			         ))
+			       ) ;; let
+		             )   ;; do
+	     )) ;; do
 	  (A$$increment_the_A_state A_st)		; A_st is modified
-	  (values new_sys A_st nil)
-	  )
-	)
-    )
-  )
+	  (values new_sys A_st nil)))))
 
 ; op a$$make_term : Operator Array[Term] Int Int -> Term
 ; create a single term from a collection of terms

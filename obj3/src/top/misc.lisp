@@ -152,7 +152,8 @@
 ; "show" "sh" "mod" "set" "do" "please"
 ; what is "mod" ?
 (defun top$commands (inp)
-  (let ((tag (car inp)) (dat (cadr inp)))
+  (let ((tag (first inp))
+        (dat (second inp)))
   (cond 
    ((or (equal "show" tag) (equal "sh" tag) (equal "select" tag))
      (let ((it (if (equal "select" tag) tag (car dat)))) (cond
@@ -182,7 +183,7 @@
 	    (print$term $$term)
 	    (terpri))
 	  (progn
-	    (princ "No current term") (terpri))))
+	    (u:princn "No current term"))))
        ((and (equal "sub" it)
 	     (cadr dat)
 	     (parse-integer (cadr dat) :junk-allowed t))
@@ -214,29 +215,28 @@
        ((equal '("modes") dat) (show_modes nil))
        ((equal '("all" "modes") dat) (show_modes t))
        ((equal "?" it)
-	(princ "  show [sorts|psort|ops|vars|eqs|params|subs|name]")
-	(princ "[<module-expression>] .") (terpri)
-	(princ "  show [sign|all|mod] [<module-expression>] .") (terpri)
-	(princ "  show select <module-expression> .") (terpri)
-	(princ "  show sort <sort-reference> .") (terpri)
-	(princ "  show op <operator-reference> .") (terpri)
-	(princ "  show [param|sub] <number> [<module-expression>] .") (terpri)
-	(princ "  show [all] rules [<module_expression>].") (terpri)
-	(princ "  show abbrev [<module-expression>] .") (terpri)
-	(princ "  show [all] rule <RuleSpec> .") (terpri)
-	(princ "  show modules .") (terpri)
-	(princ "  show [all] modes .") (terpri)
-	(princ "  show time .") (terpri)
-	(princ "  show term .") (terpri)
-	(princ "  show [pending] .") (terpri)
-	(princ "  show can be abbreviated to sh") (terpri)
-        (princ "  can precede <module-expression> by ")
-	(princ "sequence of `sub k' and `param k'") (terpri))
+	(u:fmt "  show [sorts|psort|ops|vars|eqs|params|subs|name]
+[<module-expression>] .
+  show [sign|all|mod] [<module-expression>] .
+  show select <module-expression> .
+  show sort <sort-reference> .
+  show op <operator-reference> .
+  show [param|sub] <number> [<module-expression>] .
+  show [all] rules [<module_expression>].
+  show abbrev [<module-expression>] .
+  show [all] rule <RuleSpec> .
+  show modules .
+  show [all] modes .
+  show time .
+  show term .
+  show [pending] .
+  show can be abbreviated to sh
+  can precede <module-expression> by 
+  sequence of `sub k' and `param k'~%"))
        ((equal "all" it)
 	(let ((obj$verbose t))
 	  (print_mod (cdr dat))))
-       (t (print_mod dat))
-       )))
+       (t (print_mod dat)))))
    ((equal "set" tag)
     (let* ((parity (car (last dat)))
 	   (which
@@ -285,32 +285,26 @@
        ((equal '("verbose") which)
 	(setq obj$verbose (check_parity parity)))
        ((equal '("?") which)
-	(princ "  set [trace|blips|gc show] [on|off] .") (terpri)
-	(princ "  set [print with parens|show retracts|abbrev quals]")
-	(princ " [on|off] .")
-	(terpri)
-	(princ "  set [include BOOL|clear memo|stats|trace whole]")
-        (princ " [on|off] .") (terpri)
-	(princ "  set [all eqns|all rules|show var sorts|reduce conditions]")
-	(princ " [on|off] .") (terpri)
-        (princ "  set [verbose] [on|off] .") (terpri))
-       (t (princ "Not recognized") (terpri))
-       ))))
+	(u:princn "  set [trace|blips|gc show] [on|off] .
+  set [print with parens|show retracts|abbrev quals]
+ [on|off] .
+  set [include BOOL|clear memo|stats|trace whole]
+ [on|off] .
+  set [all eqns|all rules|show var sorts|reduce conditions]
+ [on|off] .
+  set [verbose] [on|off] ."))
+       (t (u:princn "Not recognized"))))))
    ((equal "do" tag) (cond
        ((equal '("gc") dat)
 	#+GCL (gbc t)
-	#+(or LUCID CMU CLISP) (gc)
-	)
+	#+(or LUCID CMU CLISP SBCL) (gc))
        ((equal '("clear" "memo") dat) (memo-clean))
        ((equal "save" (car dat)) (obj3_save_status (cdr dat)))
        ((equal "restore" (car dat)) (obj3_restore_status (cdr dat)))
        ((equal '("?") dat)
-	(princ "  ") (princ tag) (princ " [gc|clear memo] .") (terpri)
-	(princ "  ") (princ tag) (princ " [save|restore] <Name> .") (terpri)
-	)
-       (t (princ "Not recognized") (terpri))
-       ))
-  )))
+	(u:fmt "  ~A [gc|clear memo] .
+  ~A [save|restore] <Name> .~%" tag tag))
+       (t (u:princn "Not recognized")))))))
 
 (defun check_parity (x)
   (if (equal "on" x) t
@@ -583,9 +577,6 @@
     (setq *run-time* (get-internal-run-time))
     (list (float (/ (- *run-time* sys) internal-time-units-per-second))
           (float (/ (- *real-time* real) internal-time-units-per-second)))))
-
-(defmacro call-that (x)
- `(progn (setq ,x (term$copy_and_returns_list_variable $$norm)) 'done))
 
 (defun termcopy (x) (term$copy_and_returns_list_variable x))
 

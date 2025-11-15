@@ -82,18 +82,6 @@
 
 ;; the "is_" part is not needed -- Sula Ma
 (in-package #:obj3)
-(defmacro defrepr (module_prefix name tag elts)
-  `(defstruct (,tag
-                (:conc-name ,module_prefix)
-                (:constructor 
-                 ,(intern (string-upcase 
-                   (concatenate 'string (string module_prefix) (concatenate 'string "make_" (string name)))))
-                 ,elts)
-                (:type list)
-                :named
-                )
-     ,@elts
-     ))
 
 ;; #-GCL (defun modexp$make_plus (x y) `(+ ,x ,y)) ; A + B
 

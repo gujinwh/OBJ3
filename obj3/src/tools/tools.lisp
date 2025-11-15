@@ -60,26 +60,12 @@
        (l fm x))
       ((equal x l) x)))
 
-;;; easily look at function definition
-(defmacro sf (x) `(symbol-function ',x))
-
 ;;; clear screen -- specific to Sun's
 (defvar cl)
 (setq cl (intern (string (code-char 12))))
 ;;; move window to bottom -- specific to sun's
 (defvar b)
 (setq b (intern (concatenate 'string (string (code-char 27)) "[6t")))
-
-;;; useful for finding location of error in a file
-;;;   -- replace all defun's by %defun
-;;;   -- reload to locate error
-(defmacro %defun (&rest fm)
-  (princ (car fm) *terminal-io*) (terpri *terminal-io*) (cons 'defun fm))
-
-;;; evaluate with output to a file
-(defmacro to-file (file &rest forms)
-  `(with-open-file (*standard-output* ,file :direction :output)
-      ,@forms))
 
 ;;; conditionally include a file
 

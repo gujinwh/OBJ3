@@ -19,9 +19,9 @@
                              (:file "sigs")
                              (:file "topo_sort")
                              (:file "type-of-safe")))
+               (:file "macros")
                (:module "basic"
-                :components ((:file "macros")
-                             (:file "variable")
+                :components ((:file "variable")
                              (:file "term")
                              (:file "operator")
                              (:file "optables")

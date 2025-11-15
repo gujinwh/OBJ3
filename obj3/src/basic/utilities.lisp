@@ -47,7 +47,8 @@
 (in-package #:obj3)
 
 (defun list2array (list)
-  #+(or GENERIC CMU CLISP)
+  #-(or GENERIC CMU CLISP GCL SBCL) (error "TODO: Implement it")
+  #+(or GENERIC CMU CLISP SBCL)
   (make-array (length list) :initial-contents list)
   #+GCL
   (let ((len (length list)))

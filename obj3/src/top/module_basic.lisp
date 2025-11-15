@@ -743,27 +743,26 @@
   ;; take result and create a term from it
   ;; -- also may use directly given functions
   (if (and (consp rhs) (eq 'function (car rhs)))
-      (eval rhs)
-      ;; (eval '(function car)) --> #<compiled-function car>
+      (eval rhs) ;; (eval '(function car)) --> #<compiled-function car>
       (let ((vars (term$vars lhs)))
-        (let ((params (mapcar #'(lambda (v)
-                                  (intern (string-upcase (variable$name v))))
-                              vars)))
-          (make_function `(lambda (subst)
-                            (obj$general_invoke
-                             ',(make_function
-                                `(lambda (module ,@params)
-                                   #+CMU module ; dummy use of module
-                                   ,rhs))
-                             ',(reverse vars)
-                             subst
-                             ',mod)
-                            ))
-          )))
-  )
+        (let* ((params (mapcar #'(lambda (v)
+                                   (intern (string-upcase (variable$name v))))
+                               vars))
+               (res
+                 (make_function `(lambda (subst)
+                                   (obj$general_invoke
+                                    ',(make_function
+                                       `(lambda (module ,@params)
+                                          (declare (ignorable module))
+                                          ,rhs))
+                                    ',(reverse vars)
+                                    subst
+                                    ',mod)
+                                   ))))
+          res))))
 
-; op obj$general_invoke : Function LIST[Variable] Substitution Sort -> Term
-; function should fit: function : Module Term ... -> Term
+;;; op obj$general_invoke : Function LIST[Variable] Substitution Sort -> Term
+;;; function should fit: function : Module Term ... -> Term
 (defun obj$general_invoke (fn vars subst mod)
   (let ((vals nil))
     (dolist (v vars) (push (substitution$image_by_name subst v) vals))

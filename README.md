@@ -1,3 +1,9 @@
+# Known Issues (which will be fixed soon)
+vars-of . seems not to work  when the module name is ommited.
+in Emacs make sure you save the file as Unix not as UTF8, so you can just copy one of the example files and modify it.
+
+All examples should run well, except perhaps tp.obj which is a compilation of many modules which seem to mess up each other (at least starting from Chapter 9)
+
 # Quickstart 
 
 Add to .sbclrc:
@@ -68,6 +74,8 @@ C-0 0 delete split
 (global-set-key (kbd "H-<right>") 'next-buffer)
 ;;; H is the context-menu key (which can for convenience be remapped to caps-lock if one wishes)
 ```
+
+[RLWRAP settings for SBCL](https://gist.github.com/vindarel/2309154f4e751be389fa99239764c363)
 OBJ3F1 2.11
 F1 means "fork 1" (this fork) which does not intend to remain compatible with the old Common Lisp implementations.
 OBJ3 is the ancestor of CafeOBJ and Maude. It is coded in Common Lisp and has a couple of features (eg. Parameterized Programming with Default Views) which make it very attractive for exploratory programming.

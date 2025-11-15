@@ -188,90 +188,90 @@
 	      (mod_eval$!compile mod))))
   (let ((tag (car e)))
   (when (and $$debug (<= 20 $$debug_level)) (format t "~a~%" tag))
-  (cond
-   ((equal "op" tag) (set_needs_parse)
+  (u:scase tag
+   ("op" (set_needs_parse)
     (mod_eval$$include_BOOL)
     (mod_eval$$!add_op e)
     (set_needs_parse) (set_needs_rule))
-   ((equal "let" tag) (set_needs_parse)
+   ("let" (set_needs_parse)
     (mod_eval$$include_BOOL)
     (mod_eval$$!do_let e)
     (set_needs_parse) (set_needs_rule))
-   ((equal "ops" tag) (set_needs_parse)
+   ("ops" (set_needs_parse)
     (mod_eval$$include_BOOL)
     (mod_eval$$!add_ops e)
     (set_needs_parse) (set_needs_rule))
-   ((equal "eq" tag) (needs_parse)
+   ("eq" (needs_parse)
     (mod_eval$$!add_eq e)
     (set_needs_rule))
-   ((or (equal "ceq" tag) (equal "cq" tag)) (needs_parse)
+   (("ceq" "cq") (needs_parse)
     (mod_eval$$!add_ceq e)
     (set_needs_rule))
-   ((or (equal "var" tag) (equal "vars" tag))
+   (("var" "vars")
     (set_needs_parse)
     (mod_eval$$include_BOOL)
     (mod_eval$$!add_var e))
-   ((equal "vars-of" tag)
+   ("vars-of"
     (set_needs_parse)
     (mod_eval$$include_BOOL)
     (mod_eval$$!add_vars_of e))
-   ((or (equal "sort" tag) (equal "sorts" tag))
+   (("sort" "sorts")
     (set_needs_parse)
     (mod_eval$$!add_sort e))
-   ((or (equal "psort" tag) (equal "principal-sort" tag))
+   (("psort" "principal-sort")
     (mod_eval$$!set_principal_sort e))
-   ((equal "bsort" tag)
+   ("bsort"
     (set_needs_parse)
     (mod_eval$$!add_built_in_sort e))
-   ((or (equal "subsorts" tag) (equal "subsort" tag)) ;18 Nov 87
+   (("subsorts" "subsort") ;18 Nov 87
     (set_needs_parse)
     (mod_eval$$include_BOOL)
     (mod_eval$$!add_subsorts e)
     (set_needs_rule))
-   ((equal "beq" tag) ;general form
+   ("beq" ;general form
     (needs_parse)
     (mod_eval$$!add_beq e)
     (set_needs_rule))
-   ((equal "cbeq" tag) ;general form
+   ("cbeq" ;general form
     (needs_parse)
     (mod_eval$$!add_cbeq e)
     (set_needs_rule))
-   ((equal "bq" tag)
+   ("bq"
     (needs_parse)
     (mod_eval$$!add_bq e)
     (set_needs_rule))
-   ((equal "cbq" tag)
+   ("cbq"
     (needs_parse)
     (mod_eval$$!add_cbq e)
     (set_needs_rule))
-   ((or (equal "pr" tag) (equal "protecting" tag))
+   (("pr" "protecting")
     (set_needs_parse)
     (mod_eval$$!add_pr e)
     (set_needs_rule))
-   ((or (equal "ex" tag) (equal "extending" tag))
+   (("ex" "extending")
     (set_needs_parse)
     (mod_eval$$!add_ex e)
     (set_needs_rule))
-   ((or (equal "us" tag) (equal "using" tag))
+   (("us" "using")
     (set_needs_parse)
     (mod_eval$$!add_us e)
     (set_needs_rule))
-   ((or (equal "inc" tag) (equal "including" tag))
+   (("inc" "including")
     (set_needs_parse)
     (mod_eval$$!add_inc e)
     (set_needs_rule))
-   ((or (equal "---" tag) (equal "***" tag))) ; do nothing
-   ((or (equal "--->" tag) (equal "***>" tag))
+   (("---" "***")) ; do nothing
+   (("--->" "***>")
     (print$simple_princ_open e) (terpri))
-   ((equal "as" tag)
+   ("as"
     (mod_eval$$include_BOOL)
     (mod_eval$$!add_as e)) ;rule?
-   ((equal "op-as" tag)
+   ("op-as"
     (set_needs_parse)
     (mod_eval$$include_BOOL)
     (mod_eval$$!add_op-as e)
     (set_needs_parse) (set_needs_rule))
-   ((or (equal "define" tag) (equal "dfn" tag)) ;an abbreviation
+   (("define" "dfn") ;an abbreviation
     (set_needs_parse)
     (let* ((sortnm (nth 1 e))
 	  (modexp (nth 3 e))
@@ -296,9 +296,9 @@
 	       `("*" "(" "sort" ,(sort$name psort) "to" ,sortnm ")"))
        ".")))))
     (set_needs_rule))
-   ((equal "ev" tag) ;&&&&
+   ("ev" ;&&&&
     (eval (cadr e)))
-   ((equal "parse" tag)
+   ("parse"
     (needs_parse)
     (mod_eval$$include_BOOL)
     ;@@@ check for current module?
@@ -310,17 +310,14 @@
       (print$short_sort_name (term$sort res))
       (princ " : ")
       (let ((*fancy-print* nil))
-	(term$print res) (terpri)
-	))))
-   ((equal "start" tag)
+	(term$print res) (terpri)))))
+   ("start"
     (misc$start e))
-   ((equal "apply" tag)
+   ("apply"
     (misc$apply e))
-   ((equal "[" tag)
+   ("["
     (setq *obj$current_labels* (mod_eval$process_labels (cadr e))))
-   (t (format t "module_eval: Unknown form: ~a~%" e))
-   )
-  )))
+   (t (format t "module_eval: Unknown form: ~a~%" e))))))
 
 ; op mod_eval$$!add_sort : {cur_mod} Module-Item  -> {cur_mod}
 (defun mod_eval$$!add_sort (e)

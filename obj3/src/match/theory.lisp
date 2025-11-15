@@ -116,11 +116,6 @@
 
 (defconstant AC_flags 12)
 
-; multiple bits can be tested
-(defmacro test-flag (x y)
-  `(not (= 0 (logand ,x ,y)))
-  )
-
 ;@@@@@ not used yet
 (defun theory$attributes_to_info (a c i z)
   (aref theory_info_array

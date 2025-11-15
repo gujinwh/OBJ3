@@ -58,10 +58,10 @@
 #+GCL
 (defentry hasheq (object) (object hasheq))
 
-#+(or LUCID CMU CLISP)
+#+(or LUCID CMU CLISP SBCL)
 (defun hasheq (object) (truncate (addr_of object) 4))
 
-#+(or LUCID CMU CLISP)
+#+(or LUCID CMU CLISP SBCL)
 ;; This is only an approximation.
 (defun hasheql (object)
   (if (integerp object) object
@@ -70,7 +70,7 @@
           (if (characterp object) (char-int object)
               (hasheq object)))))
 
-#+(or LUCID CMU CLISP)
+#+(or LUCID CMU CLISP SBCL)
 ;; This is written for a 32 bit machine.
 (defun hasheqlnumber (n)
   (if (integerp n) n

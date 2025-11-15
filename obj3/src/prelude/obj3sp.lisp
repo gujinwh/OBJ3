@@ -223,6 +223,7 @@
 
 ;;; obj_FLOAT
 (defun obj_FLOAT$is_Float_token (token)
+  #-(or GENERIC CMU CLISP GCL SBCL) (error "TODO: Add the right float type to the list below in the call to #'member for your implementation.")
   (and
    (stringp token)
    (or (digit-char-p (char token 0))
@@ -233,9 +234,9 @@
      (declare (ignore res))
      (and (= (length token) len)
           (member (type-of (read-from-string token))
-                  '(#+LUCID float long-float short-float fixnum bignum ratio
-                    #+CMU float short-float long-float single-float double-float
-                    #+CLISP float long-float short-float single-float double-float
+                  '(#+(or LUCID CMU CLISP SBCL) float long-float short-float fixnum bignum ratio
+                    short-float long-float single-float double-float
+                    long-float short-float single-float double-float
                     #+GCL single-float double-float short-float long-float
                     ))))))
 (defun obj_FLOAT$create_Float (token)

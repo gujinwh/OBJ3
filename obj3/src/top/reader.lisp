@@ -56,18 +56,12 @@
 
 (defconstant reader$$char_code_limit 192) ; Parameter
 
-(defvar reader$$read_table (make-array (list reader$$char_code_limit)))
+(defvar *reader$$read_table* (make-array (list reader$$char_code_limit)))
 ;;; nil entries mean treat as alphabetic/symbol component
 ;;; non-nil and symbol translate as symbol/single character token
 
-(defmacro reader$!set_syntax (ch val)
-  `(setf (aref reader$$read_table (char-code ,ch)) ,val))
-
-(defmacro reader$get_syntax (ch)
-  `(aref reader$$read_table (char-code ,ch)))
-
 (defun reader$$!read_table_init ()
-  (do ((i 0 (1+ i))) ((= i 192)) (setf (aref reader$$read_table i) nil))
+  (do ((i 0 (1+ i))) ((= i 192)) (setf (aref *reader$$read_table* i) nil))
   (reader$!set_syntax #\( '|(|) (reader$!set_syntax #\) '|)|)
   (reader$!set_syntax #\Space 'space)
   (reader$!set_syntax #\Tab 'space)
@@ -77,12 +71,7 @@
   (reader$!set_syntax #\, '|,|)
   (reader$!set_syntax #\[ '|[|) (reader$!set_syntax #\] '|]|)
   (reader$!set_syntax #\{ '|{|) (reader$!set_syntax #\} '|}|)
-  (reader$!set_syntax #\_ '|_|)
-)
-
-;;; note duplication of n
-(defmacro reader$$valid_char_code (n)
-  `(and (<= 0 ,n) (<= ,n reader$$char_code_limit)))
+  (reader$!set_syntax #\_ '|_|))
 
 ;;;; CHARACTER BUFFER
 
@@ -135,9 +124,10 @@
 ;;; OBSOLETE
 (defun reader$obj_read (&optional (file *standard-input*) (eofval nil))
   (let ((val (reader$read file)))
-    (if (equal val '(return)) '(".")
-    (if (eq *reader$eof_value* val) eofval
-	val))))
+    (when (equal val '(return)) '(".")
+          (if (eq *reader$eof_value* val)
+              eofval
+	      val))))
 
 ;;; read up to matching close parenthesis
 (defun reader$$read_list (&optional (file *standard-input*))
@@ -145,7 +135,8 @@
   (reader$$read_rest_of_list file))
 
 (defun reader$$read_rest_of_list (&optional (file *standard-input*))
-  (loop (when (not (or (eq 'space reader$$ch) (eq 'return reader$$ch)))
+  (loop (when (not (or (eq 'space reader$$ch)
+                       (eq 'return reader$$ch)))
 	      (return))
 	(setq reader$$ch (reader$$get_char file)))
   (if (eq *reader$eof_value* reader$$ch) *reader$eof_value*
@@ -156,7 +147,8 @@
     (let ((res (list "(")) x)
       (loop
 	(setq x (reader$read file))
-	(when (eq *reader$eof_value* x) (return *reader$eof_value*))
+	(when (eq *reader$eof_value* x)
+          (return *reader$eof_value*))
 	(setq res (append res x))
 	(loop (when (not (or (eq 'space reader$$ch) (eq 'return reader$$ch)))
 	        (return))
@@ -164,9 +156,8 @@
 	(when (eq '|)| reader$$ch)
 	  (setq reader$$ch (reader$$get_char file))
 	  (return (nconc res (list ")"))))
-	(when (eq *reader$eof_value* reader$$ch) (return *reader$eof_value*))
-      ))
-  )))
+	(when (eq *reader$eof_value* reader$$ch)
+          (return *reader$eof_value*)))))))
 
 ;;; used only in reader$$read_symbol
 (defvar reader$$buf (make-string 250))
@@ -201,8 +192,7 @@
       (setq reader$$ch (if kind kind inch))
       (when kind (return (subseq reader$$buf 0 (1+ p))))
     )))
-    (reader$$consider_token res)
-  )))
+    (reader$$consider_token res))))
 
 (defun reader$$suppress_ch (context)
   (declare (ignore context))
@@ -214,9 +204,7 @@
     (unread-char
      (if (characterp reader$$ch) reader$$ch
        (char (string reader$$ch) 0)))
-    (setq reader$$ch 'space)
-    ))
-  )
+    (setq reader$$ch 'space))))
 
 (defun reader$$consider_token (tok)
   (cond
@@ -233,9 +221,7 @@
     (read)
     )
    (t
-    tok)
-   )
-  )
+    tok)))
 
 (defun reader$$read_error ()
   (format t "~&ERROR: OBJ read error~%")

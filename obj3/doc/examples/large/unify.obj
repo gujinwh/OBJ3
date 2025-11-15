@@ -49,11 +49,17 @@ obj UNIFY is
      {(X = T) & (let X be T in S) & {let X be T in S' & S''}} fi .
 endo
 reduce unify 'f['g['X] 'Y] = 'f['g['h['Y]] 'h['Z]].
+
 reduce unify 'f['X 'Y] = 'f['Y 'g['Y]].
+
 reduce unify ('f['g['X] 'Y] = 'f['g['h['Y]] 'h['Z]]) & ('h['X] = 'Z).
+
 reduce unify 'f['X 'g['Y]] = 'f['Z 'Z].
+
 reduce unify 'f['X 'g['Y]] = 'f['Z].
+
 reduce unify 'f['Y 'g['Y]] = 'f['h['Z] 'Z].
+
 reduce unify 'f['Y 'a[nil]] = 'f['g['a[nil]] 'Z].
 
 ***> now add occur check
@@ -67,10 +73,17 @@ obj UNIFY-OCH is
   eq X in T Ts = X in T or X in Ts .
   cq (X = T) = fail if X in T .
 endo
+
 reduce unify 'f['g['X] 'Y] = 'f['g['h['Y]] 'h['Z]].
+
 reduce unify 'f['X 'Y] = 'f['Y 'g['Y]].
+
 reduce unify ('f['g['X] 'Y] = 'f['g['h['Y]] 'h['Z]]) & ('h['X] = 'Z).
+
 reduce unify 'f['X 'g['Y]] = 'f['Z 'Z].
+
 reduce unify 'f['X 'g['Y]] = 'f['Z].
+
 reduce unify 'f['Y 'g['Y]] = 'f['h['Z] 'Z].
+
 reduce unify 'f['Y 'a[nil]] = 'f['g['a[nil]] 'Z].

@@ -193,25 +193,6 @@
 ;;;
 (in-package #:obj3)
 
-(defmacro dotimes-fixnum (&rest body)
-  (let ((var (car (car body)))
-        (lim (cadr (car body)))
-        (res (cddr (car body)))
-        (acts (cdr body))
-        (limvar (gensym))
-        (lab (gensym)))
-    `(block ()
-       (let* ((,limvar ,lim) (,var 0))
-         (declare (fixnum ,var ,limvar))
-         (tagbody
-            ,lab
-            (if (>= ,var ,limvar) (return (progn ,@res)))
-            (tagbody ,@acts)
-            (setq ,var (1+ ,var))
-            (go ,lab))))))
-
-(defmacro incfa (x) `(setf ,x (1+ ,x)))
-
 ;;----------------------------------------------------------------------
 ;; special purpose array-allocation routines
 
@@ -311,10 +292,10 @@ object makefixarr1(n)
 ;;  (si:make-pure-array 'fixnum nil nil 0 nil m n))
 
 ;; Generic versions
-#+(or LUCID CMU CLISP)
+#+(or LUCID CMU CLISP SBCL)
 (defun make-array1 (m)
   (make-array m :element-type 'fixnum :initial-element 0))
-#+(or LUCID CMU CLISP)
+#+(or LUCID CMU CLISP SBCL)
 (defun make-array2 (m n)
   (make-array (list m n) :element-type 'fixnum :initial-element 0))
 
@@ -351,86 +332,6 @@ object makefixarr1(n)
   (no-more nil) ; when true implies that all solutions have been reported
   )
 |#
-(defmacro make-AC-state () 
-  `(make-array 26))
-
-(defmacro AC-state-operators (state)
-  `(aref ,state 0))
-
-(defmacro AC-state-lhs-f (state)
-  `(aref ,state 1))
-
-(defmacro AC-state-lhs-v (state)
-  `(aref ,state 2))
-
-(defmacro AC-state-rhs-c (state)
-  `(aref ,state 3))
-
-(defmacro AC-state-rhs-f (state)
-  `(aref ,state 4))
-
-(defmacro AC-state-lhs-f-r (state)
-  `(aref ,state 5))
-
-(defmacro AC-state-lhs-v-r (state)
-  `(aref ,state 6))
-
-(defmacro AC-state-rhs-c-r (state)
-  `(aref ,state 7))
-
-(defmacro AC-state-rhs-f-r (state)
-  `(aref ,state 8))
-
-(defmacro AC-state-lhs-mask (state)
-  `(aref ,state 9))
-
-(defmacro AC-state-lhs-f-mask (state)
-  `(aref ,state 10))
-
-(defmacro AC-state-lhs-r-mask (state)
-  `(aref ,state 11))
-
-(defmacro AC-state-rhs-c-sol (state)
-  `(aref ,state 12 ))
-
-(defmacro AC-state-rhs-c-max (state)
-  `(aref ,state 13))
-
-(defmacro AC-state-rhs-f-sol (state)
-  `(aref ,state 14))
-
-(defmacro AC-state-rhs-f-max (state)
-  `(aref ,state 15))
-
-(defmacro AC-state-rhs-full-bits (state)
-  `(aref ,state 16))
-
-(defmacro AC-state-rhs-c-compat (state)
-  `(aref ,state 17))
-
-(defmacro AC-state-rhs-f-compat (state)
-  `(aref ,state 18))
-
-(defmacro AC-state-lhs-c-count (state)
-  `(aref ,state 19))
-
-(defmacro AC-state-lhs-f-count (state)
-  `(aref ,state 20))
-
-(defmacro AC-state-lhs-v-count (state)
-  `(aref ,state 21))
-
-(defmacro AC-state-rhs-c-count (state)
-  `(aref ,state 22))
-
-(defmacro AC-state-rhs-f-count (state)
-  `(aref ,state 23))
-
-(defmacro AC-state-no-more (state)
-  `(aref ,state 24))
-
-(defmacro AC-state-ac-state-p (state)
-  `(aref ,state 25))
 
 (defun ac-state-p (state)
   (and (vectorp state) (equal (ac-state-ac-state-p state) 'ac-state)))
@@ -438,12 +339,6 @@ object makefixarr1(n)
 (defvar *pdl-debug* nil)
 
 (defvar *half* (/ 1 2))
-
-;; small utility.  Side effect.
-(defmacro AC$$Rotate-Left (array m)
-"; shifts the element one bit to the left"
-  `(setf (aref ,array ,m)
-      (* 2 (aref ,array ,m))))
 
 (defun delete-one-term (x y)
   (if (term$equational_equal x (caar y)) (cdr y)
@@ -454,36 +349,6 @@ object makefixarr1(n)
              (rplacd last (cdr rest))
              (return y))
            (setq last rest  rest (cdr rest))))))
-
-(defmacro AC$$note-repeats (mset array max gcd)
-"; puts all repeated terms together in the list, and bashes the array
- ; (into numbers) in locations corresponding to the duplicate terms. 
- ; returns the newly grouped permutation of list.
- ; e.g. for input (a b c c c d d e f f) and #(0 0 0 0 0 0 0 0 0),
- ; this should make the array into #(0 0 3 2 1 2 1 0 2 1)."
-  `(let* ((list2 nil)
-  (counter (array-dimension ,array 0)) )
-    (dolist (element ,mset)
-          (let ((n (cdr element)))
-          (declare (fixnum n))
-          (when (> n ,max)
-              (setq ,max n))
-            (setq ,gcd (gcd ,gcd n))
-        (if (> n 1) ; if it is repeated at all
-              (dotimes-fixnum (x n)
-                    (push (first element) list2)
-                    (setq counter (1- counter))
-                     (setf (aref ,array counter) (1+ x)))
-           (progn (push (first element) list2)
-                    (setq counter (1- counter))
-                     (setf (aref ,array counter) 0))))) ; this line optional
-    list2))                                     ; (if 0'd array is guaranteed)
-
-(defmacro AC$$eq-member (term list)
-; "predicate. true if term is term$equational_equal some element of list"
-  `(dolist (term2 ,list)
-      (when (term$equational_equal ,term (car ,list))
-       (return t))))
 
 (defun AC$state_initialize (sys env)
 "; takes a system of equations and an environment, and 
@@ -833,32 +698,6 @@ object makefixarr1(n)
       (t ; this row (m) is already maxed
        (setf (aref rhs-c-sol m) 1) ; reset this row
             (setq m (1+ m)))))) ; go to next row
-
-;; don't even think of using this again
-(defmacro AC$$collapse-one-array-internal (rhs-sol rhs-array)
-  `(dotimes-fixnum (j (array-dimension ,rhs-sol 0))
-           (when (> (logand (aref ,rhs-sol j) term-code) 0)
-              (push  (car (aref ,rhs-array j)) rhs-subterms))))
-
-;; don't even think of using this again
-(defmacro AC$$collapse-arrays-internal (lhs skip) 
-  `(dotimes-fixnum (i (array-dimension ,lhs 0))
-      (if (< i ,skip)
-          nil
-          (progn 
-  (setq rhs-subterms nil)
- (setq term-code (* 2 term-code))
-        (AC$$collapse-one-array-internal rhs-c-sol rhs-c)
-       (AC$$collapse-one-array-internal rhs-f-sol rhs-f)
-;      (print$brief (car (aref ,lhs i)))
-;       (map nil #'print$brief rhs-subterms)
-   (system$add_eq 
-  new-sys 
-        (match_equation$create (car (aref ,lhs i))
-           (if (cdr rhs-subterms) ; implies length is greater than 1
-           (term$make_right_assoc_normal_form_with_sort_check
-                (aref ops (cdr (aref ,lhs i))) rhs-subterms)
-                  (first rhs-subterms))))))))
 
 ;; note that this relies on side effects of the macro above.
 (defun AC$$solution_from_state (state)

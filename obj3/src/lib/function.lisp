@@ -43,11 +43,12 @@
 (in-package #:obj3)
 ; These next two are used in module_eval.lsp for built-in RHSs.
 (defun make_function (lmbd)
+  #-(or GCL LUCID CLISP CMU SBCL) (error "TODO: Implement it")
   #+GCL lmbd
   #+LUCID lmbd
   #+CLISP lmbd
   #+CMU (eval:make-interpreted-function lmbd)
-  )
+  #+SBCL (compile nil lmbd))
 
 ;; E.g., (function_lambda_expression (function-build 'bar '(x) '(princ x)))
 ;;   ==> (LAMBDA (X) (BLOCK BAR PRINC X))    ; CMU
@@ -55,17 +56,22 @@
 ;;       (LAMBDA (X) (DECLARE (SYSTEM::IN-DEFUN BAR)) (BLOCK BAR (PRINC X))) ; CLISP
 
 (defun function_lambda_expression (fcn)
+  #-(or GCL LUCID CLISP CMU SBCL) (error "TODO: Implement it")
   #+GCL fcn
   #+LUCID fcn
   #+CLISP (function-lambda-expression fcn)
   #+CMU (if (consp fcn) fcn
 	  (let ((val (function-lambda-expression fcn)))
 	    (if val val fcn)))
-  )
+  #+SBCL (function-lambda-expression fcn))
 
 ;; Many of these functions are used in obj_trace.lsp
 
 ;; Defines a function named 'name' with args 'args' and body 'body'.
+
+#-(or GCL LUCID CLISP CMU SBCL)
+(defun function-build (name args body)
+  (error "TODO: Implement it"))
 
 #+GCL
 (defun function-build (name args body)
@@ -80,27 +86,24 @@
   (eval:make-interpreted-function
    `(lambda ,args (block ,name ,@body))))
 
-#+CLISP
+#+(or CLISP SBCL)
 (defun function-build (name args body)
   (eval `(defun ,name ,args ,body)))
 
 (defun define-function (name def) (setf (symbol-function name) def))
 
-#+GCL
 (defun is-compiled (x)
-  (if (symbolp x) (and (fboundp x) (is-compiled (symbol-function x)))
-    (eq 'compiled-function (type-of x))))
+  #-(or GCL LUCID CLISP CMU SBCL) (error "TODO: Implement it")
+  (if (symbolp x)
+      (or #+sbcl t          
+          (and (fboundp x)
+               (is-compiled (symbol-function x))))
+      #+GCL(eq 'compiled-function (type-of x))
+      #+CMU(compiled-function-p x)
+      #+LUCID
+      (zerop (logand (sys:procedure-ref x sys:procedure-flags)
+	             lucid:procedure-is-interpreted-bit))))
 
-#+LUCID
-(defun is-compiled (x)
-  (if (symbolp x) (and (fboundp x) (is-compiled (symbol-function x)))
-    (zerop (logand (sys:procedure-ref x sys:procedure-flags)
-		   lucid:procedure-is-interpreted-bit))))
-
-#+CMU
-(defun is-compiled (x)
-  (if (symbolp x) (and (fboundp x) (is-compiled (symbol-function x)))
-    (compiled-function-p x)))
 
 #+CLISP
 (defun is-compiled (x)
@@ -111,7 +114,11 @@
 ;;       (LAMBDA (X) (BLOCK BAR PRINC X))        ; CMU
 ;;       (LAMBDA (X) (DECLARE (SYSTEM::IN-DEFUN BAR)) (BLOCK BAR (PRINC X))) ; CLISP
 
-#+GCL
+#-(or GCL LUCID CLISP CMU SBCL)
+(defun function-code (x)
+  (error "TODO: Implement it"))
+
+#+(or GCL SBCL)
 (defun function-code (x)
   (if (symbolp x)
     (symbol-function x)
@@ -120,7 +127,8 @@
 #+LUCID
 (defun function-code (x)
   ; only if interpreted
-  (if (symbolp x) (function-code (symbol-function x))
+  (if (symbolp x)
+      (function-code (symbol-function x))
     (sys:procedure-ref x sys:procedure-symbol)))
 
 #+CMU
@@ -136,26 +144,20 @@
 ;; E.g., (function-body (function-build 'bar '(x) '(princ x)))
 ;;   ==> (PRINC X)                  ; GCL CMU CLISP
 
-#+GCL
-(defun function-body (x)
-  (if (symbolp x) (function-body (symbol-function x))
-    (cdddr x)))
 
-#+LUCID
-(defun function-body (x)
-  ; only if interpreted
-  (if (symbolp x) (function-body (symbol-function x))
-    (cdddr (sys:procedure-ref x sys:procedure-symbol))))
 
-#+CMU
+#+(or GCL LUCID CMU CLISP)
 (defun function-body (x)
-  (if (symbolp x) (function-body (symbol-function x))
-    (cddr (caddr (function-code x)))))
+  (if (symbolp x)
+      (function-body (symbol-function x))
+      #+GCL (cdddr x)
+      #+LUCID (cdddr (sys:procedure-ref x sys:procedure-symbol))
+      #+CMU (cddr (caddr (function-code x)))
+      #+CLISP(caddr (cadddr (function-code x)))))
 
-#+CLISP
-(defun function-body (x)
-  (if (symbolp x) (function-body (symbol-function x))
-    (caddr (cadddr (function-code x)))))
+#+sbcl
+(defun function-body (defn)
+  (third (function-lambda-expression (symbol-function defn))))
 
 ;; E.g., (function-args (function-build 'bar '(x) '(princ x)))
 ;;   ==> (X)                       ; GCL CMU CLISP
@@ -181,3 +183,7 @@
 #+CLISP
 (defun function-args (defn)
   (cadr (function-code defn)))
+
+#+sbcl
+(defun function-args (defn)
+  (second (function-lambda-expression (symbol-function defn))))

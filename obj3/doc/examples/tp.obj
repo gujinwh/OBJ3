@@ -581,7 +581,9 @@ close
     [lid]  eq e * A = A .
     [linv] eq A -1 * A = e .
   endth
-  open .
+  
+open .
+  vars-of GROUPLA .
   op a : -> Elt .
     ***> first prove the right inverse law:
   start a * a -1 .
@@ -591,15 +593,15 @@ close
   apply .linv at [2 .. 3] .        ***> should be: a -1 -1 * e * a -1
   apply .lid at [2 .. 3] .         ***> should be: a -1 -1 * a -1
   apply .linv at term .            ***> should be: e
-    ***> add the proven equation:
+    ***> add the proven equation:  
   [rinv] eq A * A -1 = e .
     ***> now prove the right identity law:
   start a * e .
   apply -.linv with A = a at [2] . ***> should be: a * a -1 * a
   apply .rinv at [1 .. 2] .        ***> should be: e * a
   apply .lid at term .             ***> should be: a
-  close
-
+close
+    
   th REL is sort Rel .
     op I : -> Rel .
     op _U_ : Rel Rel -> Rel [assoc comm].
@@ -618,7 +620,8 @@ eq R * 0 = I .
 eq R * s N = (R * N);(I U R).
 close
 
-  open GROUPLA .
+        open GROUPLA .
+    vars-of GROUPLA .
   op a : -> Elt .
     ***> first prove the right inverse law:
   start a * a -1 .
@@ -656,7 +659,7 @@ close
     close
 
     set reduce conditions on .
-    open .  vars-of .
+    open .  vars-of RING .
     ops a b c : -> R .
     eq A * 0 = 0 .  *** the lemma
     [lc] cq B = C if A * B == A * C and A =/= 0 .
@@ -664,29 +667,35 @@ close
     show rules .
     start b .
     apply .lc with C = 0, A = a at top .
-    close
+close
+    
+    
 
-  set include BOOL off .
-  obj PROPC is protecting TRUTH .
-    op _and_ : Bool Bool -> Bool [assoc comm prec 2] .
-    op _xor_ : Bool Bool -> Bool [assoc comm prec 3] .
-    vars P Q R : Bool .
-    eq P and false = false .
-    eq P and true = P .
-    eq P and P = P .
-    eq P xor false = P .
-    eq P xor P = false .
-    eq P and (Q xor R) = (P and Q) xor (P and R).
+set include BOOL off .
+  obj PROPC is
+  sort Prop .
+  protecting TRUTH + QID .
+  subsorts Id Bool < Prop .
 
-    op _or_ : Bool Bool -> Bool [assoc comm prec 7] .
-    op not_ : Bool -> Bool [prec 1] .
-    op _implies_ : Bool Bool -> Bool [prec 9] .
-    op _iff_ : Bool Bool -> Bool [assoc prec 11] .
-    eq P or Q = (P and Q) xor P xor Q .
-    eq not P = P xor true .
-    eq P implies Q = (P and Q) xor P xor true .
-    eq P iff Q = P xor Q xor true .
-  endo
+  op _and_ : Prop Prop -> Prop [assoc comm prec 2] .
+  op _xor_ : Prop Prop -> Prop [assoc comm prec 3] .
+  vars p q r : Prop .
+  eq p and false = false .
+  eq p and true = p .
+  eq p and p = p .
+  eq p xor false = p .
+  eq p xor p = false .
+  eq p and (q xor r) = (p and q) xor (p and r) .
+
+  op _or_ : Prop Prop -> Prop [assoc comm prec 7] .
+  op not_ : Prop -> Prop [prec 1] .
+  op _implies_ : Prop Prop -> Prop [prec 9] .
+  op _iff_ : Prop Prop -> Prop [assoc prec 11] .
+  eq p or q = (p and q) xor p xor q .
+  eq not p = p xor true .
+  eq p implies q = (p and q) xor p xor true .
+  eq p iff q = p xor q xor true .
+endo
 
   obj DNF is protecting TRUTH .
     op _and_ : Bool Bool -> Bool [assoc comm prec 2] .
@@ -1496,11 +1505,11 @@ red even f s n .
   open NAT + PROPC .
   ops (f0_)(f1_)(f2_) : Nat -> Prop [prec 9] .
   var T : Nat .
-  eq f1 s T = not f0 T .
-  eq f2 s T = not f1 T .
+  eq f1 s(T) = not f0 T .
+  eq f2 s(T) = not f1 T .
   op t : -> Nat .
-  red f2 s s t iff f0 t .
-  close
+  red f2 s(s(t)) iff f0 t .
+close
 
 ***> Chapter 10, Order Sorted Algebra (was chapter 11)
 

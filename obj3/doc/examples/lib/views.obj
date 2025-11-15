@@ -1,5 +1,6 @@
 in theories
-
+in list2
+    
 view NATG from POSET to NAT is
   sort Elt to Nat .
   op _<_ to _>_ .

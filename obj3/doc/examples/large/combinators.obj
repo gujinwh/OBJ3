@@ -1,4 +1,5 @@
-obj COMINATORS is
+obj COMBINATORS is
+  pr TRUTH .
   sort T .
   op __ : T T -> T [gather (E e)]. *** forces left association
   ops S K I : -> T .
@@ -10,8 +11,9 @@ endo
 
 open .
 ops m n p : -> T .
-
+    
 red S K K m == I m .
+
 red S K S m == I m .
 red S I I I m == I m .
 

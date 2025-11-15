@@ -3,7 +3,7 @@ in propc
 obj TIME is
   sort Time .
   op 0 : -> Time .
-  op s_ : Time -> Time .
+  op s_ : Time -> Time . 
 endo
 
 th WIRE is

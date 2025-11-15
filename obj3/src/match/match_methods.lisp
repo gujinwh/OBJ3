@@ -49,31 +49,6 @@
 ; op match$next_fail : GlobalState -> GlobalState Substitution, 
 ;                                     signals(no_match) .
 (in-package #:obj3)
-(eval-when (eval compile)
-;(defmacro term$is_var (x) `(atom (car ,x)))
-; the following is okay only because of the simplicity of the uses of
-; this function below
-; % makes sure that this definition will only be used where chosen
-(defmacro term$%is_built_in_constant(x)
-  `(and (consp (car ,x))
-	(consp (cdar ,x))))
-;(defmacro term$head (x) `(caar ,x))
-;(defmacro term$subterms (x) `(cdr ,x))
-)
-
-;&&&& delete failed
-;(eval-when (eval)
-;(defun substitution$%lookup (teta term)
-;  (let ((val (assoc term teta)))
-;    (if val (cdr val) nil)))
-;)
-
-(eval-when (compile eval)
-(defmacro substitution$%lookup (teta term)
-  (let ((temp (gensym)))
-  `(let ((,temp (assoc ,term ,teta)))
-     (if ,temp (cdr ,temp) nil))))
-)
 
 ; This simply always fails
 ; op match$next_fail : GlobalState -> GlobalState Substitution, 
@@ -289,35 +264,29 @@
        (term$is_var t2)
        (eq t1 t2)
        (eq (variable$initial_sort t1) (car arity))
-       (eq (variable$initial_sort t2) (cadr arity))
-       )
-    ))
-   ))
-  )
+       (eq (variable$initial_sort t2) (cadr arity))))))))
 
-; assume that the rules is actually created in the form e + (x + x)
+;;; assume that the rules is actually created in the form e + (x + x)
 (defun match$is_idem_ext_ok (lhs cond)
   (and
    (obj_BOOL$is_true cond)
    (not (term$is_var lhs))
    (let ((op (term$head lhs)))
-   (and
-    (operator$is_associative op)
-    (operator$is_commutative op)
-    (let* ((arity (operator$arity op))
-	   (subs (term$subterms lhs))
-	   (t1 (car subs))
-	   (t2 (cadr subs)))
-    (and
-      (term$is_var t1)
-      (let ((vs (variable$initial_sort t1)))
-      (or
-       (eq vs *obj$sort_Universal*)
-       (and (eq vs (car arity)) (eq vs (cadr arity)))))
-      (match$is_idem_ok t2 cond)
-      (not (eq t1 (car (term$subterms t2)))) ;31 May 88 added
-      )))))
-  )
+     (and
+      (operator$is_associative op)
+      (operator$is_commutative op)
+      (let* ((arity (operator$arity op))
+	     (subs (term$subterms lhs))
+	     (t1 (car subs))
+	     (t2 (cadr subs)))
+        (and
+         (term$is_var t1)
+         (let ((vs (variable$initial_sort t1)))
+           (or
+            (eq vs *obj$sort_Universal*)
+            (and (eq vs (car arity)) (eq vs (cadr arity)))))
+         (match$is_idem_ok t2 cond)
+         (not (eq t1 (car (term$subterms t2)))))))))) ;31 May 88 added
 
 ;----------------------------------------------------------------------
 ; method for unconditional non-left-linear AC rules that split into an
@@ -540,17 +509,14 @@
 	    (rplacd prev (cdr cur)))
 	  (return))
 	(setq prev cur  cur (cdr cur))
-       )))
-    ))
-    (when (and ok (null rest)) (return (values nil subst nil nil)))
-    )
+       )))))
+      (when (and ok (null rest))
+        (return (values nil subst nil nil))))
     (multiple-value-setq
          (global_state subst no_match)
          (match$next_match global_state))
     (when no_match
-      (return (values nil nil t nil)))
-   )))
-  )))))
+      (return (values nil nil t nil)))))))))))
 
 ;----------------------------------------------------------------------
 
@@ -634,13 +600,9 @@
 	     (when (null subs1) (return))
 	     (unless (match$possibly_matches (car subs1) (car subs2))
 	       (setq ok nil) (return))
-	     (setq subs1 (cdr subs1)  subs2 (cdr subs2))
-	    )
-	    ok
-	    );let
-	  t)
-      )))
-  ))
+	     (setq subs1 (cdr subs1)  subs2 (cdr subs2)))
+	    ok)
+	  t))))))
 
 ; could improve on this
 (defun match$possibly_matches (t1 t2)
@@ -651,37 +613,32 @@
 
 ;----------------------------------------------------------------------
 (defun match$id_A_match (t1 t2)
-  (match$first_match_theory the_A_property t1 t2)
-  )
+  (match$first_match_theory the_A_property t1 t2))
 
 (defun match$id_AC_match (t1 t2)
-  (match$first_match_theory the_AC_property t1 t2)
-  )
+  (match$first_match_theory the_AC_property t1 t2))
 
 (defun match$id_A_dep_match (t1 t2)
-  (match$dep_theory the_A_property t1 t2)
-  )
+  (match$dep_theory the_A_property t1 t2))
 
 (defun match$id_AC_dep_match (t1 t2)
-  (match$dep_theory the_AC_property t1 t2)
-  )
+  (match$dep_theory the_AC_property t1 t2))
 
 (defun match$id_gen_match (t1 t2)
   (let ((th_name (theory$name (operator$theory (term$head t1)))))
   (match$first_match_theory
    (theory$code_to_info (logandc1 Z_flag (theory_info$code th_name)))
-   t1 t2)
-  ))
+   t1 t2)))
 
-; incorporate these into the originals? @@@
+;;; incorporate these into the originals? @@@
 
 (defun match$first_match_theory (th_name t1 t2)
   (multiple-value-bind (m_sys no_match) 
-;      (match_system$dec_merg_theory th_name (match_system$new t1 t2))
+      ;; (match_system$dec_merg_theory th_name (match_system$new t1 t2))
       (match_system$dec_merg (match_system$new t1 t2))
-    ; note that is the two terms are similar then "m_sys" is empty,
-    ; In the current code it is not signaled "E_equal", 
-    ; it must be corrected (ck-04/11/86)
+    ;; note that is the two terms are similar then "m_sys" is empty,
+    ;; In the current code it is not signaled "E_equal", 
+    ;; it must be corrected (ck-04/11/86)
     (if no_match 
 	(values nil nil t nil)
 	(let ((gst (global_state$new)))
@@ -692,7 +649,7 @@
 		((match_system$E_equal m_sys) 
 		 (values nil nil nil t))
 		(t (multiple-value-bind 
-		     (sys th_name_ign) (match_system$extract_one_system m_sys)
+		         (sys th_name_ign) (match_system$extract_one_system m_sys)
 		     (declare (ignore th_name_ign))
 		     ;; the matching system is not modified,
 		     ;; thus we create a new match_system
@@ -704,21 +661,16 @@
 			   (values nil nil t nil)
 			   (multiple-value-bind (new_gst subst no_match)
 			       (match$next_match 
-				 (global_state$push 
-				  gst 
-				  (state$create 
-				   (match_system$modif_m_sys m_sys sys)
-				   sys
-				   th_name
-				   th_st)))
-			     (values new_gst subst no_match nil))))
-		     )))
-	  ) ;; let
-	) ;; if
-    )
-  )
+				(global_state$push 
+				 gst 
+				 (state$create 
+				  (match_system$modif_m_sys m_sys sys)
+				  sys
+				  th_name
+				  th_st)))
+			     (values new_gst subst no_match nil)))))))))))
 
-; remainder not used
+;;; remainder not used
 (defun match_system$dec_merg_theory (th_name m_sys)
   (block no_match
     (let ((sys (match_system-sys m_sys))
@@ -744,10 +696,7 @@
       (values (match_system$create 
 		new_env
 		new_sys)
-	      nil)
-      )
-    )
-  )
+	      nil))))
 
 (defun match_equation$decomposition_theory (th_name eq)
   ; the following curious initialisation allows to modify "list_dec_eq"
@@ -759,9 +708,7 @@
 		    (match_equation$t1 eq)
 		    (match_equation$t2 eq)
 		    list_dec_eq))
-    (values (cdr list_dec_eq) no_match)
-    )
-  )
+    (values (cdr list_dec_eq) no_match)))
 
 (defun match_equation$$!decomposition_theory (th_name t1 t2 l_result)
   (block no_match
@@ -826,13 +773,7 @@
 		 (return-from no_match nil))
 		 (match_equation$$!decomposition_on_demand_theory
 		  th_name
-		  t1 t2 l_result)
-		 ))
-	       ))
-	  )))
-      )
-    );; block no_match
-  )
+		  t1 t2 l_result)))))))))))
 
 (defun match_equation$$!decomposition_on_demand_theory (th_name t1 t2 l_result)
   (if (and *rew$perform_on_demand_reduction*
@@ -841,9 +782,7 @@
       (term$!mark_as_lowest_parsed t2)
       (if (rew$!normalize_with_memo t2)
 	t
-	(match_equation$$!decomposition_theory th_name t1 t2 l_result)
-	)
-      )
+	(match_equation$$!decomposition_theory th_name t1 t2 l_result)))
     t))
 
 ; want this for id_A and id_AC variants
@@ -960,6 +899,4 @@
          (global_state subst no_match)
          (match$next_match global_state))
     (when no_match
-      (return (values nil nil t nil)))
-   )))
-  )))))
+      (return (values nil nil t nil)))))))))))

@@ -43,47 +43,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package #:obj3)
 
-(defmacro save-var (var)
-  `(progn (defvar ,var) (setq ,var ',(symbol-value var))))
-
-(defmacro obj3-save-vars ()
- `(progn
-(save-var obj3-load-time)
-(save-var obj3-version)
-(save-var obj3_status_env)
-
-(save-var *modexp_eval$canon_env*)
-(save-var *modexp_eval$env*)
-(save-var *modexp_eval$view_env*)
-
-(save-var *operator$name_table*)
-(save-var *operator$retract_table*)
-(save-var mod_eval$creation_counter)
-
-(save-var the_empty_property)
-(save-var the_Z_property)
-(save-var the_I_property)
-(save-var the_IZ_property)
-(save-var the_C_property)
-(save-var the_CZ_property)
-(save-var the_CI_property)
-(save-var the_CIZ_property)
-(save-var the_A_property)
-(save-var the_AZ_property)
-(save-var the_AI_property)
-(save-var the_AIZ_property)
-(save-var the_AC_property)
-(save-var the_ACZ_property)
-(save-var the_ACI_property)
-(save-var the_ACIZ_property)
-(save-var theory$the_empty_theory)
-
-(save-var obj_BUILT-IN$keyword)
-(save-var obj_LISP$keyword)
-(re-install-prelude)
-  ; end of save-vars
-  ))
-
 (defun obj3-save-state (file)
   (let ((filename (concatenate 'string file ".lisp"))
 	(filebin (concatenate 'string file ".sbin")))

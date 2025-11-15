@@ -42,6 +42,14 @@
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package #:obj3)
+
+(defun lcl () nil)
+
+(defun bye ()
+  (finish-output)
+  #+sbcl(sb-ext:quit)
+  #-sbcl(quit))
+
 (defvar obj3-load-time)
 
 (defvar *top-level-tag* '(*quit-tag*))
@@ -90,50 +98,7 @@
 
 (defun at-top-level ()
   (and (null *obj$input_source*)
-       (<= *obj$input_level* 0))
-  )
-
-(defvar obj3-version "2.09") ; default value
-
-(defun obj3-greeting ()
-  (unless (uiop:getenv "OBJ3-QUIET")
-  (sp 25) (princ " \\|||||||||||||||||/") (terpri)
-  (sp 24) (princ "--- Welcome to OBJ3 ---") (terpri)
-  (sp 25) (princ " /|||||||||||||||||\\") (terpri)
-  (sp 7) (princ "OBJ3 (with TRIM) version ") (princ obj3-version)
-      (princ " built: ") (princ obj3-load-time) (terpri)
-  (princ "OBJ3 2.06,2.08,2.09 Copyright (c) 2000-2003 Joseph Kiniry, Joseph Goguen") (terpri)
-  (sp 10) (princ "OBJ3 2.05 (c) 2000 Sula Ma, Joseph Kiniry, Joseph Goguen") (terpri)
-  (sp 12) (princ "OBJ3 2.04 Copyright 1988,1989,1991 SRI International") (terpri)
-  (sp 18) (princ "TRIM Copyright (c) 1994,2001 Lutz Hamel") (terpri)
-  (sp 24) (princ (get-time-string)) (terpri)
-  ))
-
-;; @todo kiniry 25 Sept 2003 - Need to add support for process-args
-;; for CMU and CLISP.
-
-(defun obj3 ()
-  ;; lhh -- init some global stuff
-  (setq *unique-string* (convert-to-string (get-universal-time)))
-  (setq *obj-unique-filename* (concatenate 'string "/tmp/OBJ" *unique-string*))
-
-  (obj3-init)
-  #+LUCID (buffer-line)
-  (obj3-greeting)
-  (when (uiop:getenv "OBJ3-TIMING") (setq $$time-red t))
-  #+LUCID (when (uiop:getenv "OBJ3-BATCH") (buffer-on))
-  #+GCL (process-args)
-  (let ((quit-flag nil))
-    (loop
-       (catch *top-level-tag*
-         (process_input)
-         (setq quit-flag t)
-         )                              ;catch
-       (when quit-flag (return))
-       )                                ;loop
-    )                                   ;let
-  (finish-output)                       ; only really needed for LUCID
-  )
+       (<= *obj$input_level* 0)))
 
 (defun obj_input (f)
   (if (and (< 4 (length f)) (equal ".obj" (subseq f (- (length f) 4))))
@@ -355,13 +320,13 @@
             ((inp1= "ls")
              (map nil (lambda (pathname)
                         (u:fmt "~A~%" pathname))
-                  (uiop:directory-files (uiop:getcwd))))
+                  (append (directory "*")
+                          (uiop:directory-files (uiop:getcwd) "*.*"))))
             ((inp1= "cd")
-             (uiop:chdir "../")
              (let ((fn (expand_file_name inp2)))
-               (if (probe-file (concatenate 'string fn "/"))
-                   (uiop:chdir fn)
-                   (print "Directory not found")))))
+               (if (probe-file fn)
+                   (u:chdir fn (string= fn (namestring (uiop:getcwd))))
+                   (u:fmt "Directory not found ~S~%" fn)))))
           (setq *obj$print_errors* t)))
       inp)))
 
@@ -462,36 +427,3 @@
     (prin1 (file-position #-CLISP *standard-input* #+CLISP (make-stream :input))))
   (terpri)))
 
-(defun obj3-init-files ()
-  (let ((*obj$input_quiet* t))
-    (if (probe-file "./.obj3")
-      (obj_input_file "./.obj3")
-      (let ((home (or 
-		   (namestring (user-homedir-pathname))
-		   (uiop:getenv "HOME"))))
-	(when home
-	  (let ((dot-obj3 (concatenate 'string home "/.obj3")))
-	    (when (probe-file dot-obj3) (obj_input_file dot-obj3)))))))
-  (let ((val (uiop:getenv "OBJ3INIT")))
-    (when (and val (probe-file val)) (obj_input_file val)))
-  )
-
-; lhh -- help screen for compile command.
-(defun obj_top_level_help ()
-  (u:fmt "Top-level definitional forms include: obj, theory, view, make
-The top level commands include:
-  q; quit --- to exit from OBJ3
-  show .... .  --- for further help: show ? .
-  set .... . --- for further help: set ? .
-  do .... . --- for further help: do ? .
-  apply .....  --- for further help: apply ? .
-  other commands:
-    in <filename>
-    red <term> .
-    run [verbose|keep] <term> .
-    compile [verbose|noopt|keep] [<module-expression>] .
-    select <module-expression> .
-    cd <directory>; ls; pwd
-    start <term> .; show term .
-    open [<module-expression>] .; openr [<module-expression>] .; close
-    ev <lisp>; evq <lisp>"))

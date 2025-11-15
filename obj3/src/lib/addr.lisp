@@ -50,14 +50,11 @@
 #+GCL
 (defentry addr_of (object) (object addr_of))
 
-#+LUCID
-(defun addr_of (x) (sys:%pointer x))
-
-#+CMU
-(defun addr_of (x) (kernel:get-lisp-obj-address x))
-
-#+CLISP
-(defun addr_of (x) (system::address-of x))
+(defun addr_of (x)
+  (#+LUCID sys:%pointer
+   #+CMU kernel:get-lisp-obj-address
+   #+CLISP system::address-of
+   #+SBCL sb-kernel:get-lisp-obj-address x))
     
 (defun print$addr (x)
   (format t "0x~8,'0x" (addr_of x)))

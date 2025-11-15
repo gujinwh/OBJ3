@@ -6,7 +6,8 @@
    #:prin1n
    #:rel-to-cwd
    #:rel-to-src
-   #:scase))
+   #:scase
+   #:chdir))
 
 (defpackage :obj3
   (:use :clsafe)

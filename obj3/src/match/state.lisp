@@ -43,9 +43,6 @@
 ;;;;;;;;;;;;;;;; Claude Kirchner ;;;; Created: April 86.
 
 ;;;;;;;;;;;;;;;; Summary
-
-
-
 ;;; Documented by state.clu
 
 ;;; state = cluster is get_match_system, initialize, create, next_state
@@ -60,6 +57,7 @@
 ;                                    % is currently in the state "state".
 ;             th: theory, % the theory in which the system to be solved is
 ;             theory_state : one_of ...}
+(in-package #:obj3)
 
 (defstruct (state
 	    (:constructor make_state
@@ -76,13 +74,7 @@
 )
 
 (defun state$sys_to_solve (st)
-  (state-sys_to_solve st)
-  )
-
-; returns a new state
-; op state$create : Match_System System Theory_name Theory_State -> State
-(defmacro state$create (m_sys sys_to_solve th_name theory_state)
-  `(make_state t ,m_sys ,sys_to_solve ,th_name ,theory_state))
+  (state-sys_to_solve st))
 
 ; returns a non empty decomposed and merged 
 ; Initialize a state in which a match system "m_sys" has been inserted.

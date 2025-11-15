@@ -46,23 +46,6 @@
 
 ;; A substitution is supposed to be an association list.
 (in-package #:obj3)
-;; op substitution$new: -> Substitution.
-(defmacro substitution$new ()
-  '()
-  )
-
-;; op substitution$create: Variable Term -> Substitution
-; not used
-(defmacro substitution$create (var term)
-  `(list (cons ,var ,term))
-  ;18 Feb 88 added list
-  )
-
-;; op substitution$add: Substitution var term -> Substitution
-(defmacro substitution$add (subst var term)
-;  `(acons ,var ,term ,subst)
-  `(cons (cons ,var ,term) ,subst)
-  )
 
 ;; Returns teta(t) and "true" iff the sort of "t" and "teta(t)" are the same.
 ;; A COPY of the term "t" is done and the sort information is updated.

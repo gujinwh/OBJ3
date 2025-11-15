@@ -61,50 +61,69 @@
 
 (defun ob< (x y) (eq 'lt (ob-compare x y)))
 
+(defun define-type-predicate (type)
+  (compile (intern (string-upcase (concatenate 'string (symbol-name type) "p")))
+           (lambda (object)
+             (typep object type))))
+
+(dolist (type '(fixnum bignum ratio short-float long-float sequence))
+  (define-type-predicate type))
+
+(defun structurep (object)
+  (let ((structure-type #+SBCL 'structure-object
+                        #-SBCL 'structure))
+    (typep object structure-type)))
+
 (defun ob-compare (x y)
-  (let ((typex (type-of x)) (typey (type-of y)))
-    (if (and (eq 'fixnum typex) (eq 'fixnum typey))
-        (if (< (the fixnum x) (the fixnum y)) 'lt
-            (if (< (the fixnum y) (the fixnum x)) 'gt
+  #-(or GENERIC CMU CLISP GCL SBCL) (error "TODO: Implement it")
+  (let ((typex (type-of x))
+        (typey (type-of y)))
+    (if (and (fixnump x) (fixnump y))
+        (if (< (the fixnum x) (the fixnum y))
+            'lt
+            (if (< (the fixnum y) (the fixnum x))
+                'gt
                 'eq))
-        (if (eq 'symbol typex)
-            (if (eq 'symbol typey)
+        (if (symbolp x)
+            (if (symbolp y)
                 (if (string< (string x) (string y)) 'lt
                     (if (string< (string y) (string x)) 'gt
                         'eq))
                 'lt)
-            (if (eq 'symbol typey) 'gt
-                (if (eq 'cons typex)
-                    (if (eq 'cons typey)
+            (if (symbolp y)
+                'gt
+                (if (consp x)
+                    (if (consp y)
                         (let ((cmp-car (ob-compare (car x) (car y))))
                           (if (eq 'eq cmp-car) (ob-compare (cdr x) (cdr y))
                               cmp-car))
                         'lt)
-                    (if (or (eq 'fixnum typex) (eq 'bignum typex)
-                            (eq 'ratio typex) (eq 'shortfloat typex) (eq 'longfloat typex))
-                        (if (or  (eq 'fixnum typey) (eq 'bignum typey)
-                                 (eq 'ratio typey) (eq 'shortfloat typey) (eq 'longfloat typey))
+                    (if (or (fixnump x) (bignump x)
+                            (ratiop x) (short-floatp x) (long-floatp x))
+                        (if (or  (fixnump y) (bignump y)
+                                 (ratiop y) (short-floatp y) (long-floatp y))
                             (if (< x y) 'lt (if (< y x) 'gt 'eq))
                             'lt)
-                        (if (or  (eq 'fixnum typey) (eq 'bignum typey)
-                                 (eq 'ratio typey) (eq 'shortfloat typey) (eq 'longfloat typey))
+                        (if (or  (fixnump y) (bignump y)
+                                 (ratiop y) (short-floatp y) (long-floatp y))
                             'gt
                             (if (characterp x)
                                 (if (characterp y) (if (char< x y) 'lt (if (char< y x) 'gt 'eq)) 'lt)
-                                (if (characterp y) 'gt
-                                    (if (eq 'complex typex)
-                                        (if (eq 'complex typey)
+                                (if (characterp y)
+                                    'gt
+                                    (if (complexp x)
+                                        (if (complexp y)
                                             (let ((rx (realpart x)) (ry (realpart y)))
                                               (if (< rx ry) 'lt (if (< ry rx) 'gt
                                                                     (let ((ix (imagpart x)) (iy (imagpart y)))
                                                                       (if (< ix iy) 'lt (if (< iy ix) 'gt 'eq))))))
                                             'lt)
-                                        (if (eq 'complex typey) 'gt
+                                        (if (complexp y) 'gt
                                             (if (stringp x)
                                                 (if (stringp y) (if (string< x y) 'lt (if (string< y x) 'gt 'eq)) 'lt)
                                                 (if (stringp y) 'gt
                                                     (if (typep x 'sequence)
-                                                        (if (typep y 'sequence)
+                                                        (if (sequencep y)
                                                             (let ((lenx (length x))  (leny (length y)))
                                                               (dotimes (i (min lenx leny) (ob-compare lenx leny))
                                                                 (let ((xi (elt x i))  (yi (elt y i)))
@@ -113,39 +132,52 @@
                                                             'lt)
                                                         ;; CMU CL and CLISP provides no (obvious) type predicate for structures and
                                                         ;; structures are typep 'symbol, thus this code will never be run.
-                                                        #-(or LUCID GCL) (assert nil)
-                                                        #+(or LUCID GCL)
-                                                        (if (typep y 'sequence) 'gt
-                                                            (if (typep x 'structure)
-                                                                (if (typep y 'structure)
-                                                                    (let ((lenx
-                                                                           #+LUCID (sys:structure-length x nil)
-                                                                           #+GCL (length
-                                                                                  #-AKCL (get typex 'si:slot-descriptions)
-                                                                                  #+AKCL (system::s-data-slot-descriptions
-                                                                                          (get typex 'system:s-data))))
-                                                                          (leny
-                                                                           #+LUCID (sys:structure-length y nil)
-                                                                           #+GCL (length
-                                                                                  #-AKCL (get typey 'si:slot-descriptions)
-                                                                                  #+AKCL (system::s-data-slot-descriptions
-                                                                                          (get typey 'system:s-data)))))
+                                                        #-(or LUCID GCL SBCL LISPWORKS) (assert nil)
+                                                        #+(or LUCID GCL SBCL LISPWORKS)
+                                                        (if (sequencep y) 'gt
+                                                            (if (structurep x)
+                                                                (if (structurep y)
+                                                                    (let* ((slots-x (object-slots x)
+                                                                                    )
+                                                                           (slots-y (object-slots y))
+                                                                           (lenx (length x))
+                                                                           (leny (length y)))
                                                                       (dotimes (i (min lenx leny) (ob-compare lenx leny))
-                                                                        (let ((xi
-                                                                               #+LUCID (sys:structure-ref x i nil)
-                                                                               #+GCL (si:structure-ref x typex i))
-                                                                              (yi
-                                                                               #+LUCID (sys:structure-ref y i nil)
-                                                                               #+GCL (si:structure-ref y typey i)))
-                                                                          (let ((cmp (ob-compare xi yi)))
-                                                                            (unless (eq 'eq cmp) (return cmp))))))
+                                                                        (let* ((xi (nth-slot-value i x slots-x))
+                                                                               (yi (nth-slot-value i y slots-y))
+                                                                               (cmp (ob-compare xi yi)))
+                                                                          (unless (eq 'eq cmp)
+                                                                            (return cmp)))))
                                                                     'lt)
-                                                                (if (typep y 'structure) 'gt
-                                                                    (if (string-lessp (string typex) (string typey)) 'lt
-                                                                        (if (string-lessp (string typey) (string typex)) 'gt
+                                                                (if (structurep y)
+                                                                    'gt
+                                                                    (if (string-lessp (string typex) (string typey))
+                                                                        'lt
+                                                                        (if (string-lessp (string typey) (string typex))
+                                                                            'gt
                                                                             (let ((xa (addr_of x)) (ya (addr_of y)))
                                                                               (if (< xa ya) 'lt
                                                                                   (if (< ya xa) 'gt
-                                                                                      'eq)))))
+                                                                                      'eq)))))))))))))))))))))))
 
-                                                                    ))))))))))))))))))
+(defun object-slots (object)
+  #-(or GENERIC CMU CLISP GCL SBCL LISPWORKS) (error "TODO: Implement it")
+  #+LUCID (sys:objecture-length x nil)
+  #+GCL (length
+         #-AKCL (get (type-of object) 'si:slot-descriptions)
+         #+AKCL (system::s-data-slot-descriptions
+                 (get (type-of object) 'system:s-data)))
+  #+(or SBCL LISPWORKS)
+  (let ((class (find-class (type-of object))))
+    (#+SBCL sb-mop:class-direct-slots
+     #+LISPWORKS structure:structure-class-slot-names
+     class)))
+
+(defun number-of-slots (object)
+  (length (object-slots object)))
+
+(defun nth-slot-value (n object slots)
+  #-(or LUCID GCL SBCL LISPWORKS) (error "TODO: Implement it")
+  #+LUCID (sys:structure-ref x i nil)
+  #+GCL (si:structure-ref x typex i)
+  #+(or SBCL LISPWORKS)(slot-value object (nth n slots)))

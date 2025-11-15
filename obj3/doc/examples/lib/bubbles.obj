@@ -26,3 +26,4 @@ obj BUBBLES[X :: TOSET] is
   eq sorted E = true .
   cq sorted E E' L = sorted E' L if E < E' or E == E' .
 endo
+    

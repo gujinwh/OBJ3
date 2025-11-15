@@ -15,39 +15,39 @@ op a : -> Elt .
 *** first, prove the right inverse law:
 start a * a -1 .
  ***> [0] (a * a -1)
-apply -.lid at that .
+apply -.lid at term .
  ***> [1] e * (a * a -1)
-apply -.lnv with A = (a -1) within that .
+apply -.lnv with A = (a -1) within term .
  ***> [2] ((a -1) -1 * a -1) * (a * a -1)
-apply .las at that .
+apply .las at term .
  ***> [3] ((a -1 -1 * a -1)* a)* a -1
-apply -.las with A = (a -1 -1) within that .
+apply -.las with A = (a -1 -1) within term .
  ***> [4] ((a -1 -1 * (a -1 * a)) * a -1
-apply .lnv within that .
+apply .lnv within term .
  ***> [5] (a -1 -1 * e) * a -1
-apply -.las at that .
+apply -.las at term .
  ***> [6] a -1 -1 * (e * a -1)
-apply .lid within that .
+apply .lid within term .
  ***> [7] a -1 -1 * a -1
-apply .lnv at that .
+apply .lnv at term .
  ***> [8] e
-
+vars-of GROUPL .
 *** we can now add the proven equation
- [rnv] eq (A * (A -1)) = e .
+[rnv] eq (A * (A -1)) = e .
 
 *** next, we prove the right identity law:
 start a * e .
  ***> [0] a * e
-apply -.lnv with A = a within that .
+apply -.lnv with A = a within term .
  ***> [1] a *(a -1 * a)
-apply .las at that .
+apply .las at term .
  ***> [2] (a * a -1)* a
-apply .rnv within that .
+apply .rnv within term .
  ***> [3] e * a
-apply .lid at that .
+apply .lid at term .
  ***> [4] a
 
 ***> we can add the proven equation
- [rid] eq A * e = A .
+[rid] eq A * e = A .
 
 close

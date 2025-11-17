@@ -1,5 +1,8 @@
 (in-package #:obj3.util)
 
+(defun trim-spaces (string &optional (spaces '(#\Space #\Newline #\Backspace #\Tab #\Linefeed #\Page #\Return #\Rubout)))
+  (string-trim spaces string))
+
 (defun fmt (&rest args)
   (apply #'format t args)
   (finish-output t))

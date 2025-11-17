@@ -157,6 +157,7 @@
 	(*general_read$$input* *general_read$$void*)
 	(*top-level* (at-top-level)))
     ;;(reader$!read_init) ;@@ (take out for obj LISP)
+    (obj3-init)
     (memo_rew$create_memo_table)
     (let ((*in-in* nil))
       (catch 'end-process-input

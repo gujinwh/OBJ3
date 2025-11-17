@@ -313,7 +313,7 @@
 (defun general_read$$named (name context)
   (let ((val (assoc name *general_read$$schema_env*)))
     (cond
-     (val (general_read$$read (cadr val) context))
+     (val (general_read$$read (second val) context))
      (t (format t "Undefined name in general reader ~a" name)
 	(obj3-break)))))
 
@@ -620,7 +620,7 @@
      |expect:| (&seq_of &term) |.|)
    (call-that &symbol |.|)
    ((&+ red-loop rl) &symbol) ;@ change?
-   ((&+ input in) (&call (read-line)))
+   ((&+ input in) (&call (u:trim-spaces (read-line))))
    ((&+ ---> ***>) &comment)
    ((&+ --- ***) &commentlong)
    (parse &term |.|)

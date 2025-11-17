@@ -58,11 +58,13 @@
   (let ((quit-flag nil))
     (loop
       (catch *top-level-tag*
-        (process_input)
-        (setq quit-flag t))
+        (with-simple-restart (ignore-error "Ignore error and return to obj3 toplevel")
+          (process_input)
+          (setq quit-flag t)))
       (when quit-flag (return))))                           
   #+LUCID(finish-output))
 
+(defparameter *version* '(:obj3)) ; used by the macro alt which is similar to #+ #-
 (defvar obj3-version "2.11")
 
 (defun obj3-greeting ()

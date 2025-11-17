@@ -61,7 +61,9 @@
 ;;; non-nil and symbol translate as symbol/single character token
 
 (defun reader$$!read_table_init ()
-  (do ((i 0 (1+ i))) ((= i 192)) (setf (aref *reader$$read_table* i) nil))
+  (dotimes (i reader$$char_code_limit)
+    (setf (aref *reader$$read_table* i)
+          nil))
   (reader$!set_syntax #\( '|(|) (reader$!set_syntax #\) '|)|)
   (reader$!set_syntax #\Space 'space)
   (reader$!set_syntax #\Tab 'space)
@@ -81,11 +83,11 @@
 
 (defun reader$$get_char (file)
   (declare (optimize (safety 2)))
-  (let ((inch (read-char file nil *reader$eof_value*)))
-;;    (break "inch: ~A" inch)
-    (if (eq inch *reader$eof_value*) *reader$eof_value*
-	(let ((val (reader$get_syntax inch)))
-	  (if val val inch)))))
+  (let* ((inch (read-char file nil *reader$eof_value*)))
+    (if (eq inch *reader$eof_value*)
+        *reader$eof_value*
+        (or (reader$get_syntax inch)
+            inch))))
 
 ;;; READER ROUTINES
 
@@ -95,30 +97,37 @@
   ;;   form: (setq reader$$ch (reader$$get_char ...))
   (eq *reader$eof_value* reader$$ch))
 
+(defun space? (ch)
+  (or (eq 'space ch)
+      (eq 'return ch)))
+
+(defun consume-spaces (stream)
+  (loop (unless (space? reader$$ch)
+	  (return reader$$ch))
+        (setq reader$$ch (reader$$get_char stream))))
+
+(defun consume-spaces-eof? (stream)
+  (eq (consume-spaces stream)
+      *reader$eof_value*))
 ;;; read a symbol
-(defun reader$read_sym (&optional (file *standard-input*))
-  (loop (when (not (or (eq 'space reader$$ch) (eq 'return reader$$ch)))
-	      (return))
-	(setq reader$$ch (reader$$get_char file)))
-  (if (eq *reader$eof_value* reader$$ch) *reader$eof_value*
-    (reader$$read_symbol)))
+(defun reader$read_sym (&optional (stream *standard-input*))
+  (if (consume-spaces-eof? stream)
+      *reader$eof_value*
+    (reader$$read_symbol stream)))
 
 ;;; treat "(,)" specially; read a parenthesized unit
-(defun reader$read (&optional (file *standard-input*))
-  (loop (when (not (or (eq 'space reader$$ch) (eq 'return reader$$ch)))
-	      (return))
-	(setq reader$$ch (reader$$get_char file)))
-  (if (eq *reader$eof_value* reader$$ch) *reader$eof_value*
+(defun reader$read (&optional (stream *standard-input*))
+  (if (consume-spaces-eof? stream)
+      *reader$eof_value*
   (case reader$$ch
-    (|(| (reader$$read_list file)) ;...)
+    (|(| (reader$$read_list stream)) ;...)
     (return nil)
     (otherwise
      (if (symbolp reader$$ch)
          (let ((str (string reader$$ch)))
              (setq reader$$ch 'space)
              (list (reader$$consider_token str)))
-         (list (reader$$read_symbol file))))
-  )))
+         (list (reader$$read_symbol stream)))))))
 
 ;;; special top level read
 ;;; OBSOLETE
@@ -134,27 +143,22 @@
   (setq reader$$ch (reader$$get_char file))
   (reader$$read_rest_of_list file))
 
-(defun reader$$read_rest_of_list (&optional (file *standard-input*))
-  (loop (when (not (or (eq 'space reader$$ch)
-                       (eq 'return reader$$ch)))
-	      (return))
-	(setq reader$$ch (reader$$get_char file)))
-  (if (eq *reader$eof_value* reader$$ch) *reader$eof_value*
+(defun reader$$read_rest_of_list (&optional (stream *standard-input*))
+  (if (consume-spaces-eof? stream)
+      *reader$eof_value*
   (if (eq '|)| reader$$ch)
     (progn
-      (setq reader$$ch (reader$$get_char file))
+      (setq reader$$ch (reader$$get_char stream))
       (list "(" ")"))
     (let ((res (list "(")) x)
       (loop
-	(setq x (reader$read file))
+	(setq x (reader$read stream))
 	(when (eq *reader$eof_value* x)
           (return *reader$eof_value*))
 	(setq res (append res x))
-	(loop (when (not (or (eq 'space reader$$ch) (eq 'return reader$$ch)))
-	        (return))
-	  (setq reader$$ch (reader$$get_char file)))
+	(consume-spaces stream)
 	(when (eq '|)| reader$$ch)
-	  (setq reader$$ch (reader$$get_char file))
+	  (setq reader$$ch (reader$$get_char stream))
 	  (return (nconc res (list ")"))))
 	(when (eq *reader$eof_value* reader$$ch)
           (return *reader$eof_value*)))))))
